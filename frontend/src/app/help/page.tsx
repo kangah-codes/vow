@@ -193,9 +193,7 @@ export default function HelpPage() {
 
 	// When searching, auto-open all matching items
 	const defaultOpenValues = search.trim()
-		? filteredData.flatMap((cat) =>
-				cat.items.map((item) => item.question),
-			)
+		? filteredData.flatMap((cat) => cat.items.map((item) => item.question))
 		: [];
 
 	return (
@@ -212,7 +210,7 @@ export default function HelpPage() {
 				]}
 			/>
 
-			<main className="mx-auto w-full max-w-2xl flex-1 px-4 pt-10 pb-16 md:pt-14">
+			<main className="mx-auto w-full max-w-4xl flex-1 px-4 pt-10 pb-16 md:pt-14">
 				{/* Header */}
 				<div className="text-center">
 					<h1 className="font-display text-4xl font-bold text-brand-brown md:text-5xl">
@@ -276,9 +274,7 @@ export default function HelpPage() {
 										<Accordion.Header asChild>
 											<h3>
 												<Accordion.Trigger className="group flex w-full items-center justify-between gap-4 px-5 py-4 text-left text-sm font-medium text-brand-brown transition-colors hover:text-brand-brown/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2 md:text-base">
-													<span>
-														{item.question}
-													</span>
+													<span>{item.question}</span>
 													<ChevronDown className="shrink-0 text-brand-brown/50 transition-transform duration-200 group-data-[state=open]:rotate-180" />
 												</Accordion.Trigger>
 											</h3>
@@ -297,7 +293,7 @@ export default function HelpPage() {
 
 				{/* Still Need Help */}
 				<section
-					className="mt-14 rounded-2xl bg-stone-50 p-6 md:p-8"
+					className="mt-14 rounded-2xl bg-stone-50 p-6 md:p-8 border border-stone-300"
 					aria-labelledby="still-need-help"
 				>
 					<div className="text-center">
@@ -319,9 +315,7 @@ export default function HelpPage() {
 						>
 							<EmailSupportIcon />
 							<div className="text-center">
-								<p className="text-sm font-bold">
-									Email Support
-								</p>
+								<p className="text-sm font-bold">Email Support</p>
 								<p className="mt-0.5 text-xs text-brand-brown/60 underline underline-offset-2">
 									support@villageofwisdom.org
 								</p>
@@ -347,9 +341,7 @@ export default function HelpPage() {
 						>
 							<DocumentationIcon />
 							<div className="text-center">
-								<p className="text-sm font-bold">
-									Documentation
-								</p>
+								<p className="text-sm font-bold">Documentation</p>
 								<p className="mt-0.5 text-xs text-brand-brown/60">
 									View full guides
 								</p>

@@ -11,6 +11,7 @@ export type HowItWorksStepProps = {
 	/** Image alt text */
 	imageAlt: string;
 	className?: string;
+	decorations?: React.ReactNode;
 };
 
 export function HowItWorksStep({
@@ -19,10 +20,11 @@ export function HowItWorksStep({
 	imageSrc,
 	imageAlt,
 	className,
+	decorations,
 }: HowItWorksStepProps) {
 	return (
 		<div className={cn("flex flex-col", className)}>
-			<div className="relative aspect-5/3 w-full overflow-hidden rounded-xl">
+			<div className="relative aspect-5/3 w-full overflow- rounded-xl">
 				<Image
 					src={imageSrc}
 					alt={imageAlt}
@@ -30,6 +32,7 @@ export function HowItWorksStep({
 					className="object-cover"
 					sizes="(max-width: 768px) 100vw, 33vw"
 				/>
+				{decorations}
 			</div>
 			<div className="mt-4 flex items-start gap-3">
 				<span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-brand-orange text-lg font-bold text-white">

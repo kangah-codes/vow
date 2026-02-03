@@ -20,6 +20,22 @@ export default function RootLayout({
 }>) {
 	return (
 		<html lang="en">
+			<head>
+				<link
+					rel="icon"
+					href="https://villageofwisdom.org/wp-content/uploads/2024/03/cropped-Favicon@4x-192x192.png"
+					sizes="192x192"
+				/>
+				<link
+					rel="icon"
+					href="https://villageofwisdom.org/wp-content/uploads/2024/03/cropped-Favicon@4x-32x32.png"
+					sizes="32x32"
+				/>
+				<link
+					rel="apple-touch-icon"
+					href="https://villageofwisdom.org/wp-content/uploads/2024/03/cropped-Favicon@4x-180x180.png"
+				/>
+			</head>
 			<body className={`${inter.variable} antialiased`}>
 				<OfflineDetector />
 				{children}

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Nav } from "@/components/ui/Nav";
 import { ActionCard } from "@/components/ui/ActionCard";
 import { HowItWorksStep } from "@/components/ui/HowItWorksStep";
+import Image from "next/image";
 
 export default function Home() {
 	const [accessCode, setAccessCode] = useState("");
@@ -99,24 +100,57 @@ export default function Home() {
 				</h2>
 
 				<div className="mt-10 grid gap-10 md:mt-14 md:grid-cols-3 md:gap-8">
-					<HowItWorksStep
-						step={1}
-						description="Answer questions about your child"
-						imageSrc="/images/step-1.svg"
-						imageAlt="Parent answering questions about their child"
-					/>
-					<HowItWorksStep
-						step={2}
-						description="Watch their profile build in real-time"
-						imageSrc="/images/step-2.svg"
-						imageAlt="Child's profile being built in real-time"
-					/>
-					<HowItWorksStep
-						step={3}
-						description="Download and share with educators"
-						imageSrc="/images/step-3.svg"
-						imageAlt="Sharing the profile with educators"
-					/>
+					<div className="relative">
+						<HowItWorksStep
+							step={1}
+							description="Answer questions about your child"
+							imageSrc="/images/step-1.png"
+							imageAlt="Parent answering questions about their child"
+							decorations={
+								<Image
+									src="images/twirl.svg"
+									alt="Image twirl decoration"
+									width={236}
+									height={26}
+									className="absolute left-1/2 -translate-x-1/2 top-0 -translate-y-1/2"
+								/>
+							}
+						/>
+					</div>
+					<div className="relative">
+						<HowItWorksStep
+							step={2}
+							description="Watch their profile build in real-time"
+							imageSrc="/images/step-2.png"
+							imageAlt="Child's profile being built in real-time"
+							decorations={
+								<Image
+									src="images/twirl.svg"
+									alt="Image twirl decoration"
+									width={236}
+									height={26}
+									className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 rotate-90 scale-75"
+								/>
+							}
+						/>
+					</div>
+					<div className="relative">
+						<HowItWorksStep
+							step={3}
+							description="Download and share with educators"
+							imageSrc="/images/step-3.png"
+							imageAlt="Sharing the profile with educators"
+							decorations={
+								<Image
+									src="images/twirl.svg"
+									alt="Image twirl decoration"
+									width={236}
+									height={26}
+									className="absolute left-1/2 -translate-x-1/2 bottom-0 translate-y-1/2"
+								/>
+							}
+						/>
+					</div>
 				</div>
 			</section>
 		</div>
