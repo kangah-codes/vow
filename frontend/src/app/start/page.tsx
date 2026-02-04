@@ -1,15 +1,53 @@
 "use client";
 
-import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Nav } from "@/components/ui/Nav";
+import { useCreateProfile } from "@/lib/hooks/useCreateProfile";
+
+interface StartFormValues {
+	studentName: string;
+	gradeLevel: string;
+	age: string;
+	school: string;
+	relationship: string;
+}
 
 export default function StartPage() {
-	const [studentName, setStudentName] = useState("");
-	const [gradeLevel, setGradeLevel] = useState("");
-	const [age, setAge] = useState("");
-	const [school, setSchool] = useState("");
-	const [relationship, setRelationship] = useState("");
+	const router = useRouter();
+	const createProfile = useCreateProfile();
+
+	const {
+		register,
+		handleSubmit,
+		formState: { errors },
+	} = useForm<StartFormValues>({
+		defaultValues: {
+			studentName: "",
+			gradeLevel: "",
+			age: "",
+			school: "",
+			relationship: "",
+		},
+	});
+
+	const onSubmit = (data: StartFormValues) => {
+		createProfile.mutate(
+			{
+				studentName: data.studentName,
+				gradeLevel: data.gradeLevel,
+				age: data.age ? Number(data.age) : undefined,
+				school: data.school || undefined,
+				relationship: data.relationship,
+			},
+			{
+				onSuccess: (res) => {
+					router.push(`/conversation/${res.data.conversationId}`);
+				},
+			},
+		);
+	};
 
 	return (
 		<div className="flex min-h-screen flex-col bg-brand-brown">
@@ -82,12 +120,15 @@ export default function StartPage() {
 						</p>
 					</div>
 
+					{createProfile.error && (
+						<div className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">
+							{createProfile.error.message}
+						</div>
+					)}
+
 					<form
 						className="mt-8 space-y-5"
-						onSubmit={(e) => {
-							e.preventDefault();
-							// TODO: handle start
-						}}
+						onSubmit={handleSubmit(onSubmit)}
 					>
 						{/* Student's Name */}
 						<div>
@@ -98,11 +139,16 @@ export default function StartPage() {
 							<input
 								type="text"
 								placeholder="First and Last Name"
-								value={studentName}
-								onChange={(e) => setStudentName(e.target.value)}
-								required
+								{...register("studentName", {
+									required: "Student's name is required",
+								})}
 								className="mt-1.5 h-14 w-full rounded-lg border border-brand-cream bg-white px-4 text-base text-brand-brown outline-none transition placeholder:text-brand-brown/40 focus:border-brand-brown/40"
 							/>
+							{errors.studentName && (
+								<p className="mt-1 text-sm text-red-500">
+									{errors.studentName.message}
+								</p>
+							)}
 						</div>
 
 						{/* Grade Level + Age */}
@@ -113,9 +159,9 @@ export default function StartPage() {
 									<span className="text-brand-orange">*</span>
 								</label>
 								<select
-									value={gradeLevel}
-									onChange={(e) => setGradeLevel(e.target.value)}
-									required
+									{...register("gradeLevel", {
+										required: "Grade level is required",
+									})}
 									className="mt-1.5 h-14 w-full appearance-none rounded-lg border border-brand-cream bg-white px-4 text-base text-brand-brown outline-none transition focus:border-brand-brown/40"
 								>
 									<option value="" disabled>
@@ -136,17 +182,21 @@ export default function StartPage() {
 									<option value="11">11th Grade</option>
 									<option value="12">12th Grade</option>
 								</select>
+								{errors.gradeLevel && (
+									<p className="mt-1 text-sm text-red-500">
+										{errors.gradeLevel.message}
+									</p>
+								)}
 							</div>
 							<div>
 								<label className="text-sm font-bold text-brand-brown">
 									Age (Optional)
 								</label>
 								<select
-									value={age}
-									onChange={(e) => setAge(e.target.value)}
+									{...register("age")}
 									className="mt-1.5 h-14 w-full appearance-none rounded-lg border border-brand-cream bg-white px-4 text-base text-brand-brown outline-none transition focus:border-brand-brown/40"
 								>
-									<option value="" disabled>
+									<option value="">
 										Select age
 									</option>
 									{Array.from({ length: 15 }, (_, i) => i + 4).map((a) => (
@@ -166,8 +216,7 @@ export default function StartPage() {
 							<input
 								type="text"
 								placeholder="School name"
-								value={school}
-								onChange={(e) => setSchool(e.target.value)}
+								{...register("school")}
 								className="mt-1.5 h-14 w-full rounded-lg border border-brand-cream bg-white px-4 text-base text-brand-brown outline-none transition placeholder:text-brand-brown/40 focus:border-brand-brown/40"
 							/>
 						</div>
@@ -179,9 +228,9 @@ export default function StartPage() {
 								<span className="text-brand-orange">*</span>
 							</label>
 							<select
-								value={relationship}
-								onChange={(e) => setRelationship(e.target.value)}
-								required
+								{...register("relationship", {
+									required: "Relationship is required",
+								})}
 								className="mt-1.5 h-14 w-full appearance-none rounded-lg border border-brand-cream bg-white px-4 text-base text-brand-brown outline-none transition focus:border-brand-brown/40"
 							>
 								<option value="" disabled>
@@ -194,27 +243,39 @@ export default function StartPage() {
 								<option value="educator">Educator</option>
 								<option value="other">Other</option>
 							</select>
+							{errors.relationship && (
+								<p className="mt-1 text-sm text-red-500">
+									{errors.relationship.message}
+								</p>
+							)}
 						</div>
 
 						{/* Submit */}
 						<button
 							type="submit"
-							className="!mt-8 inline-flex h-13 w-full items-center justify-center gap-2 rounded-full bg-brand-brown text-base font-bold uppercase tracking-wider text-white transition-colors hover:bg-brand-brown/90"
+							disabled={createProfile.isPending}
+							className="!mt-8 inline-flex h-13 w-full items-center justify-center gap-2 rounded-full bg-brand-brown text-base font-bold uppercase tracking-wider text-white transition-colors hover:bg-brand-brown/90 disabled:opacity-60"
 						>
-							Begin Conversation
-							<svg
-								width="16"
-								height="16"
-								viewBox="0 0 16 16"
-								fill="none"
-								stroke="currentColor"
-								strokeWidth="2"
-								strokeLinecap="round"
-								strokeLinejoin="round"
-								aria-hidden="true"
-							>
-								<path d="M3 8h10M9 4l4 4-4 4" />
-							</svg>
+							{createProfile.isPending ? (
+								"Creating Profile..."
+							) : (
+								<>
+									Begin Conversation
+									<svg
+										width="16"
+										height="16"
+										viewBox="0 0 16 16"
+										fill="none"
+										stroke="currentColor"
+										strokeWidth="2"
+										strokeLinecap="round"
+										strokeLinejoin="round"
+										aria-hidden="true"
+									>
+										<path d="M3 8h10M9 4l4 4-4 4" />
+									</svg>
+								</>
+							)}
 						</button>
 					</form>
 

@@ -16,24 +16,43 @@ function isAuthRoute(pathname: string): boolean {
 	);
 }
 
-async function verifyToken(token: string): Promise<boolean> {
+async function verifyToken(
+	token: string,
+): Promise<"valid" | "expired" | "invalid"> {
 	const secret = process.env.JWT_SECRET;
-	if (!secret) return false;
+	if (!secret) return "invalid";
 
 	try {
 		await jwtVerify(token, new TextEncoder().encode(secret));
-		return true;
-	} catch {
-		return false;
+		return "valid";
+	} catch (err) {
+		if (
+			err instanceof Error &&
+			"code" in err &&
+			(err as { code: string }).code === "ERR_JWT_EXPIRED"
+		) {
+			return "expired";
+		}
+		return "invalid";
 	}
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
 	const { pathname } = request.nextUrl;
 	const token = request.cookies.get("accessToken")?.value;
-	const isValid = token ? await verifyToken(token) : false;
+	const status = token ? await verifyToken(token) : "invalid";
+	const isValid = status === "valid";
 
 	if (isProtectedRoute(pathname) && !isValid) {
+		if (status === "expired") {
+			const response = NextResponse.redirect(
+				new URL("/session-expired", request.url),
+			);
+			response.cookies.delete("accessToken");
+			response.cookies.delete("refreshToken");
+			return response;
+		}
+
 		const loginUrl = new URL("/login", request.url);
 		loginUrl.searchParams.set("redirect", pathname);
 		return NextResponse.redirect(loginUrl);

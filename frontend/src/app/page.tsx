@@ -4,16 +4,20 @@ import { useState } from "react";
 import { Nav } from "@/components/ui/Nav";
 import { ActionCard } from "@/components/ui/ActionCard";
 import { HowItWorksStep } from "@/components/ui/HowItWorksStep";
+import { useCurrentUser } from "@/lib/hooks/useCurrentUser";
 import Image from "next/image";
 
 export default function Home() {
 	const [accessCode, setAccessCode] = useState("");
+	const { data: user } = useCurrentUser();
 
 	return (
 		<div className="min-h-screen bg-white">
 			<Nav
 				actions={[
-					{ label: "Login", href: "/login", variant: "filled" },
+					user
+						? { label: "Dashboard", href: "/dashboard", variant: "filled" }
+						: { label: "Login", href: "/login", variant: "filled" },
 					{ label: "Help", href: "/help", variant: "outlined" },
 				]}
 			/>

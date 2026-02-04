@@ -9,7 +9,8 @@ import { cn } from "@/lib/utils";
 
 export type NavAction = {
 	label: string;
-	href: string;
+	href?: string;
+	onClick?: () => void;
 	variant: "filled" | "outlined" | "orange";
 };
 
@@ -140,18 +141,32 @@ export function Nav({
 							{greeting}
 						</span>
 					)}
-					{actions.map((action) => (
-						<Link
-							key={action.label}
-							href={action.href}
-							className={cn(
-								"inline-flex h-11 items-center justify-center rounded-full px-7 text-sm font-semibold uppercase tracking-wider transition-colors",
-								actionClasses(action.variant, dark),
-							)}
-						>
-							{action.label}
-						</Link>
-					))}
+					{actions.map((action) =>
+						action.href ? (
+							<Link
+								key={action.label}
+								href={action.href}
+								className={cn(
+									"inline-flex h-11 items-center justify-center rounded-full px-7 text-sm font-semibold uppercase tracking-wider transition-colors",
+									actionClasses(action.variant, dark),
+								)}
+							>
+								{action.label}
+							</Link>
+						) : (
+							<button
+								key={action.label}
+								type="button"
+								onClick={action.onClick}
+								className={cn(
+									"inline-flex h-11 items-center justify-center rounded-full px-7 text-sm font-semibold uppercase tracking-wider transition-colors",
+									actionClasses(action.variant, dark),
+								)}
+							>
+								{action.label}
+							</button>
+						),
+					)}
 				</div>
 
 				{/* -------- Right zone (mobile hamburger) -------- */}
@@ -197,19 +212,36 @@ export function Nav({
 								)}
 
 								<div className="mt-6 flex flex-col gap-3">
-									{actions.map((action) => (
-										<Link
-											key={action.label}
-											href={action.href}
-											onClick={() => setMobileOpen(false)}
-											className={cn(
-												"inline-flex h-11 items-center justify-center rounded-full px-7 text-sm font-semibold uppercase tracking-wider transition-colors",
-												actionClasses(action.variant, false),
-											)}
-										>
-											{action.label}
-										</Link>
-									))}
+									{actions.map((action) =>
+										action.href ? (
+											<Link
+												key={action.label}
+												href={action.href}
+												onClick={() => setMobileOpen(false)}
+												className={cn(
+													"inline-flex h-11 items-center justify-center rounded-full px-7 text-sm font-semibold uppercase tracking-wider transition-colors",
+													actionClasses(action.variant, false),
+												)}
+											>
+												{action.label}
+											</Link>
+										) : (
+											<button
+												key={action.label}
+												type="button"
+												onClick={() => {
+													setMobileOpen(false);
+													action.onClick?.();
+												}}
+												className={cn(
+													"inline-flex h-11 items-center justify-center rounded-full px-7 text-sm font-semibold uppercase tracking-wider transition-colors",
+													actionClasses(action.variant, false),
+												)}
+											>
+												{action.label}
+											</button>
+										),
+									)}
 								</div>
 
 								{backLink && (

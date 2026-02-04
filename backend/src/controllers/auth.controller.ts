@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { User } from "../models/user.model";
+import { AuthRequest } from "../middleware/auth.middleware";
 import {
 	hashPassword,
 	comparePassword,
@@ -140,6 +141,67 @@ export async function login(req: Request, res: Response): Promise<void> {
 		res.status(500).json({
 			success: false,
 			error: "Login failed",
+		});
+	}
+}
+
+export async function getMe(req: AuthRequest, res: Response): Promise<void> {
+	try {
+		const user = await User.findById(req.userId).select(
+			"-password -refreshTokens -__v",
+		);
+
+		if (!user) {
+			res.status(404).json({ success: false, error: "User not found" });
+			return;
+		}
+
+		res.json({
+			success: true,
+			data: {
+				id: user._id,
+				email: user.email,
+				firstName: user.firstName,
+				lastName: user.lastName,
+				role: user.role,
+				focusGroupOptIn: user.focusGroupOptIn,
+			},
+		});
+	} catch (error) {
+		res.status(500).json({
+			success: false,
+			error: "Failed to fetch user",
+		});
+	}
+}
+
+export async function logout(req: AuthRequest, res: Response): Promise<void> {
+	try {
+		const refreshToken = req.body.refreshToken;
+		if (!refreshToken) {
+			res.status(400).json({
+				success: false,
+				error: "Refresh token is required",
+			});
+			return;
+		}
+
+		const user = await User.findById(req.userId);
+		if (!user) {
+			res.status(404).json({ success: false, error: "User not found" });
+			return;
+		}
+
+		user.refreshTokens = user.refreshTokens.filter(
+			(token) => token !== refreshToken,
+		);
+		await user.save();
+
+		res.json({ success: true, message: "Logged out successfully" });
+	} catch (error) {
+		res.status(500).json({
+			success: false,
+			error: "Logout failed",
 		});
 	}
 }

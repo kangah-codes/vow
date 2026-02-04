@@ -1,49 +1,39 @@
 "use client";
 
 import Link from "next/link";
+import { useRef } from "react";
 import { Nav } from "@/components/ui/Nav";
+import { useCurrentUser } from "@/lib/hooks/useCurrentUser";
+import { useProfiles, type Profile } from "@/lib/hooks/useProfiles";
+import { useLogout } from "@/lib/hooks/useLogout";
 
 /* ── Types ── */
 
 type ProfileStatus = "complete" | "in-progress";
 
-type ProfileCard = {
-	id: string;
-	studentName: string;
-	grade: string;
-	lastUpdated: string;
-	percentComplete: number;
-	status: ProfileStatus;
-};
+/* ── Helpers ── */
 
-/* ── Mock Data ── */
+function timeAgo(dateStr: string): string {
+	const now = Date.now();
+	const diff = now - new Date(dateStr).getTime();
+	const minutes = Math.floor(diff / 60000);
+	if (minutes < 1) return "just now";
+	if (minutes < 60) return `${minutes}m ago`;
+	const hours = Math.floor(minutes / 60);
+	if (hours < 24) return `${hours}h ago`;
+	const days = Math.floor(hours / 24);
+	if (days < 7) return `${days}d ago`;
+	const weeks = Math.floor(days / 7);
+	if (weeks < 5) return `${weeks}w ago`;
+	const months = Math.floor(days / 30);
+	return `${months}mo ago`;
+}
 
-const MOCK_PROFILES: ProfileCard[] = [
-	{
-		id: "1",
-		studentName: "Sarah Johnson",
-		grade: "Grade 5",
-		lastUpdated: "2 days ago",
-		percentComplete: 100,
-		status: "complete",
-	},
-	{
-		id: "2",
-		studentName: "Michael Chen",
-		grade: "Grade 8",
-		lastUpdated: "5 hours ago",
-		percentComplete: 65,
-		status: "in-progress",
-	},
-	{
-		id: "3",
-		studentName: "Emma Rodriguez",
-		grade: "Grade 3",
-		lastUpdated: "1 week ago",
-		percentComplete: 25,
-		status: "in-progress",
-	},
-];
+function formatGrade(gradeLevel: string): string {
+	if (gradeLevel === "pre-k") return "Pre-K";
+	if (gradeLevel === "k") return "Kindergarten";
+	return `Grade ${gradeLevel}`;
+}
 
 /* ── Status Badge ── */
 
@@ -123,12 +113,12 @@ function ProgressBar({
 
 /* ── Profile Card ── */
 
-function ProfileCardComponent({ profile }: { profile: ProfileCard }) {
+function ProfileCardComponent({ profile }: { profile: Profile }) {
 	const isComplete = profile.status === "complete";
 
 	return (
 		<article
-			className="flex flex-col rounded-xl border border-stone-200 bg-white p-5"
+			className="flex flex-col h-full rounded-xl border border-stone-200 bg-white p-5"
 			aria-label={`${profile.studentName}'s profile`}
 		>
 			<div className="flex items-start justify-between gap-3">
@@ -139,7 +129,8 @@ function ProfileCardComponent({ profile }: { profile: ProfileCard }) {
 			</div>
 
 			<p className="mt-1.5 text-xs text-brand-brown/50">
-				{profile.grade} • Last updated {profile.lastUpdated}
+				{formatGrade(profile.gradeLevel)} • Last updated{" "}
+				{timeAgo(profile.updatedAt)}
 			</p>
 
 			<div className="mt-4">
@@ -153,7 +144,7 @@ function ProfileCardComponent({ profile }: { profile: ProfileCard }) {
 				{isComplete ? (
 					<>
 						<Link
-							href={`/profile/${profile.id}`}
+							href={`/profile/${profile._id}`}
 							className="inline-flex h-9 items-center justify-center rounded-full bg-brand-brown px-4 text-xs font-bold uppercase tracking-wider text-white transition-colors hover:bg-brand-brown/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
 						>
 							View
@@ -174,7 +165,7 @@ function ProfileCardComponent({ profile }: { profile: ProfileCard }) {
 				) : (
 					<>
 						<Link
-							href={`/conversation/${profile.id}`}
+							href={`/conversation/${profile._id}`}
 							className="inline-flex h-9 items-center justify-center rounded-full bg-brand-brown px-4 text-xs font-bold uppercase tracking-wider text-white transition-colors hover:bg-brand-brown/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
 						>
 							Continue
@@ -201,9 +192,100 @@ function ProfileCardComponent({ profile }: { profile: ProfileCard }) {
 	);
 }
 
+/* ── Profiles Carousel ── */
+
+function ProfilesCarousel({ profiles }: { profiles: Profile[] }) {
+	const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+	const scroll = (direction: "left" | "right") => {
+		if (!scrollContainerRef.current) return;
+
+		const scrollAmount = 400;
+		const newScrollLeft =
+			scrollContainerRef.current.scrollLeft +
+			(direction === "left" ? -scrollAmount : scrollAmount);
+
+		scrollContainerRef.current.scrollTo({
+			left: newScrollLeft,
+			behavior: "smooth",
+		});
+	};
+
+	return (
+		<div className="relative mt-6">
+			{/* Left Arrow */}
+			<button
+				onClick={() => scroll("left")}
+				className="absolute left-0 top-1/2 z-10 -translate-y-1/2 -translate-x-4 hidden md:flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-lg border border-stone-200 text-brand-brown transition-all hover:bg-brand-brown hover:text-white hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
+				aria-label="Scroll left"
+			>
+				<svg
+					width="20"
+					height="20"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					strokeWidth="2.5"
+					strokeLinecap="round"
+					strokeLinejoin="round"
+				>
+					<path d="M15 18l-6-6 6-6" />
+				</svg>
+			</button>
+
+			{/* Scrollable Container */}
+			<div
+				ref={scrollContainerRef}
+				className="flex items-stretch gap-4 overflow-x-auto scrollbar-hide snap-x snap-mandatory scroll-smooth pb-4"
+				style={{
+					scrollbarWidth: "none",
+					msOverflowStyle: "none",
+				}}
+			>
+				{profiles.map((profile) => (
+					<div
+						key={profile._id}
+						className="flex-none w-full md:w-[calc(33.333%-0.667rem)] snap-start"
+					>
+						<ProfileCardComponent profile={profile} />
+					</div>
+				))}
+			</div>
+
+			{/* Right Arrow */}
+			<button
+				onClick={() => scroll("right")}
+				className="absolute right-0 top-1/2 z-10 -translate-y-1/2 translate-x-4 hidden md:flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-lg border border-stone-200 text-brand-brown transition-all hover:bg-brand-brown hover:text-white hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
+				aria-label="Scroll right"
+			>
+				<svg
+					width="20"
+					height="20"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					strokeWidth="2.5"
+					strokeLinecap="round"
+					strokeLinejoin="round"
+				>
+					<path d="M9 18l6-6-6-6" />
+				</svg>
+			</button>
+		</div>
+	);
+}
+
 /* ── Account Settings ── */
 
-function AccountSettings() {
+function AccountSettings({
+	name,
+	email,
+	role,
+}: {
+	name: string;
+	email: string;
+	role: string;
+}) {
 	return (
 		<section
 			className="rounded-xl border border-stone-200 bg-white p-5 md:p-8"
@@ -219,7 +301,7 @@ function AccountSettings() {
 			<dl className="mt-6 divide-y divide-stone-100">
 				<div className="py-4 first:pt-0">
 					<dt className="text-sm font-bold text-brand-brown">Name</dt>
-					<dd className="mt-1 text-sm text-brand-brown/70">John Smith</dd>
+					<dd className="mt-1 text-sm text-brand-brown/70">{name}</dd>
 					<dd>
 						<button
 							type="button"
@@ -232,9 +314,7 @@ function AccountSettings() {
 
 				<div className="py-4">
 					<dt className="text-sm font-bold text-brand-brown">Email</dt>
-					<dd className="mt-1 text-sm text-brand-brown/70">
-						john.smith@email.com
-					</dd>
+					<dd className="mt-1 text-sm text-brand-brown/70">{email}</dd>
 					<dd>
 						<button
 							type="button"
@@ -260,7 +340,7 @@ function AccountSettings() {
 
 				<div className="py-4">
 					<dt className="text-sm font-bold text-brand-brown">Account Type</dt>
-					<dd className="mt-1 text-sm text-brand-brown/70">Parent/Caregiver</dd>
+					<dd className="mt-1 text-sm text-brand-brown/70">{role}</dd>
 				</div>
 			</dl>
 		</section>
@@ -270,13 +350,25 @@ function AccountSettings() {
 /* ── Page ── */
 
 export default function DashboardPage() {
+	const { data: user, isLoading: userLoading } = useCurrentUser();
+	const { data: profiles, isLoading: profilesLoading } = useProfiles();
+	const { mutate: logout } = useLogout();
+
+	if (userLoading || profilesLoading) {
+		return (
+			<div className="flex min-h-screen items-center justify-center bg-white">
+				<p className="text-brand-brown/60">Loading...</p>
+			</div>
+		);
+	}
+
 	return (
 		<div className="flex min-h-screen flex-col bg-white">
 			<Nav
-				greeting="Welcome, John"
+				greeting={user ? `Welcome, ${user.firstName}` : undefined}
 				actions={[
 					{ label: "Help", href: "/help", variant: "filled" },
-					{ label: "Logout", href: "/login", variant: "filled" },
+					{ label: "Logout", onClick: () => logout(), variant: "filled" },
 				]}
 			/>
 
@@ -314,16 +406,53 @@ export default function DashboardPage() {
 						Your Profiles
 					</h2>
 
-					<div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
-						{MOCK_PROFILES.map((profile) => (
-							<ProfileCardComponent key={profile.id} profile={profile} />
-						))}
-					</div>
+					{profiles && profiles.length > 0 ? (
+						<ProfilesCarousel profiles={profiles} />
+					) : (
+						<div className="mt-6 flex flex-col items-center rounded-xl border-2 border-dashed border-stone-200 px-6 py-16 text-center">
+							<div className="flex h-16 w-16 items-center justify-center rounded-full bg-brand-orange/10">
+								<svg
+									width="28"
+									height="28"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									strokeWidth="1.5"
+									strokeLinecap="round"
+									strokeLinejoin="round"
+									className="text-brand-orange"
+									aria-hidden="true"
+								>
+									<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+									<circle cx="9" cy="7" r="4" />
+									<line x1="19" y1="8" x2="19" y2="14" />
+									<line x1="22" y1="11" x2="16" y2="11" />
+								</svg>
+							</div>
+							<h3 className="mt-4 font-display text-lg font-bold text-brand-brown">
+								No profiles yet
+							</h3>
+							<p className="mt-1.5 max-w-sm text-sm text-brand-brown/50">
+								Start a guided conversation to create your first student
+								profile, or resume one with an access code.
+							</p>
+							<Link
+								href="/start"
+								className="mt-6 inline-flex h-11 items-center justify-center rounded-full bg-brand-brown px-6 text-sm font-bold uppercase tracking-wider text-white transition-colors hover:bg-brand-brown/90"
+							>
+								Start New Profile
+							</Link>
+						</div>
+					)}
 				</section>
 
 				{/* Account Settings */}
 				<div className="mt-12">
-					<AccountSettings />
+					<AccountSettings
+						name={user ? `${user.firstName} ${user.lastName}` : ""}
+						email={user ? user.email : ""}
+						role={user ? user.role : ""}
+					/>
 				</div>
 			</main>
 		</div>
