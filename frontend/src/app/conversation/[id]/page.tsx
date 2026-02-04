@@ -1,75 +1,225 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { useParams } from "next/navigation";
 import * as Tabs from "@radix-ui/react-tabs";
 import { Nav } from "@/components/ui/Nav";
-import { ChatBubble } from "@/components/ui/Chat";
-import { ChatInput } from "@/components/ui/Chat";
+import { ChatBubble, ChatInput, TypingIndicator } from "@/components/ui/Chat";
 import { ProfileProgress } from "@/components/ui/ProfileProgress";
-import type { ProfileSectionData } from "@/components/ui/ProfileProgress";
+import { useConversation } from "@/lib/hooks/useConversation";
 
-const MOCK_MESSAGES = [
-	{
-		id: "1",
-		sender: "ai" as const,
-		senderName: "AI Assistant",
-		message:
-			"Hello! I'm excited to help you create Sarah's Genius Profile. Let's start by talking about her interests. What activities does Sarah enjoy in her free time?",
-		timestamp: "10:30 AM",
-	},
-	{
-		id: "2",
-		sender: "user" as const,
-		senderName: "You",
-		message:
-			"She loves drawing and painting. She spends hours creating art and is always excited to show me her latest work.",
-		timestamp: "10:31 AM",
-	},
-	{
-		id: "3",
-		sender: "ai" as const,
-		senderName: "AI Assistant",
-		message:
-			"That's wonderful! Creative expression is such an important part of Interest Awareness. Can you tell me what specific aspects of art she's most drawn to?",
-		timestamp: "10:32 AM",
-	},
-];
+const WS_URL = "ws://localhost:3001";
 
-const MOCK_SECTIONS: ProfileSectionData[] = [
-	{
-		title: "Interest Awareness",
-		status: "complete",
-		description:
-			"Sarah demonstrates strong creative interests, particularly in visual arts. She shows intrinsic motivation and sustained engagement with artistic activities.",
-	},
-	{
-		title: "Racial/Cultural Pride",
-		status: "in-progress",
-		description: "Building profile section...",
-	},
-	{ title: "Can-Do Attitude", status: "not-started" },
-	{ title: "Multicultural Navigation", status: "not-started" },
-	{ title: "Selective Trust", status: "not-started" },
-	{ title: "Social Justice", status: "not-started" },
-];
+interface ChatMsg {
+	id: string;
+	sender: "ai" | "user";
+	senderName: string;
+	message: string;
+	timestamp: string;
+}
+
+function formatTime(ts: string | Date): string {
+	const d = new Date(ts);
+	return d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+}
+
+function getAccessToken(): string | undefined {
+	if (typeof document === "undefined") return undefined;
+	const match = document.cookie.match(/(?:^|; )accessToken=([^;]*)/);
+	return match?.[1];
+}
 
 export default function ConversationPage() {
+	const params = useParams();
+	const id = params.id as string;
+	const { data, isLoading, error } = useConversation(id);
+
+	const [messages, setMessages] = useState<ChatMsg[]>([]);
 	const [inputValue, setInputValue] = useState("");
+	const [isAiTyping, setIsAiTyping] = useState(false);
+	const [streamingMessage, setStreamingMessage] = useState<string | null>(
+		null,
+	);
+	const [isConnected, setIsConnected] = useState(false);
+
+	const wsRef = useRef<WebSocket | null>(null);
+	const messagesEndRef = useRef<HTMLDivElement>(null);
+	const hasJoined = useRef(false);
+
+	// Populate messages from API data
+	useEffect(() => {
+		if (data?.conversation.messages) {
+			setMessages(
+				data.conversation.messages.map((m) => ({
+					id: m._id,
+					sender: m.sender,
+					senderName: m.senderName,
+					message: m.message,
+					timestamp: formatTime(m.timestamp),
+				})),
+			);
+		}
+	}, [data]);
+
+	// Auto-scroll to bottom
+	useEffect(() => {
+		messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+	}, [messages, isAiTyping, streamingMessage]);
+
+	// WebSocket connection
+	useEffect(() => {
+		if (!id || !data) return;
+
+		const token = getAccessToken();
+		if (!token) return;
+
+		const ws = new WebSocket(WS_URL);
+		wsRef.current = ws;
+
+		ws.onopen = () => {
+			setIsConnected(true);
+			ws.send(
+				JSON.stringify({
+					type: "join",
+					payload: { token, conversationId: id },
+				}),
+			);
+			hasJoined.current = true;
+		};
+
+		ws.onmessage = (event) => {
+			const msg = JSON.parse(event.data);
+
+			switch (msg.type) {
+				case "message_saved": {
+					setMessages((prev) => [
+						...prev,
+						{
+							id: msg.payload.id,
+							sender: msg.payload.sender,
+							senderName: msg.payload.senderName,
+							message: msg.payload.message,
+							timestamp: formatTime(msg.payload.timestamp),
+						},
+					]);
+					break;
+				}
+				case "ai_typing": {
+					setIsAiTyping(true);
+					break;
+				}
+				case "ai_stream_start": {
+					setIsAiTyping(false);
+					setStreamingMessage("");
+					break;
+				}
+				case "ai_stream_chunk": {
+					setStreamingMessage(msg.payload.full);
+					break;
+				}
+				case "ai_stream_end": {
+					setStreamingMessage(null);
+					setMessages((prev) => [
+						...prev,
+						{
+							id: msg.payload.id,
+							sender: msg.payload.sender,
+							senderName: msg.payload.senderName,
+							message: msg.payload.message,
+							timestamp: formatTime(msg.payload.timestamp),
+						},
+					]);
+					break;
+				}
+				case "error": {
+					console.error("WebSocket error:", msg.payload.message);
+					break;
+				}
+			}
+		};
+
+		ws.onclose = () => {
+			setIsConnected(false);
+			hasJoined.current = false;
+		};
+
+		return () => {
+			ws.close();
+			wsRef.current = null;
+		};
+	}, [id, data]);
+
+	const handleSend = useCallback(() => {
+		if (
+			!inputValue.trim() ||
+			!wsRef.current ||
+			wsRef.current.readyState !== WebSocket.OPEN
+		)
+			return;
+
+		wsRef.current.send(
+			JSON.stringify({
+				type: "send_message",
+				payload: { message: inputValue.trim() },
+			}),
+		);
+		setInputValue("");
+	}, [inputValue]);
+
+	if (isLoading) {
+		return (
+			<div className="flex min-h-screen items-center justify-center bg-brand-brown">
+				<div className="text-lg font-semibold text-white/70">
+					Loading conversation...
+				</div>
+			</div>
+		);
+	}
+
+	if (error || !data) {
+		return (
+			<div className="flex min-h-screen items-center justify-center bg-brand-brown">
+				<div className="text-lg font-semibold text-white/70">
+					{error?.message || "Conversation not found"}
+				</div>
+			</div>
+		);
+	}
+
+	const { profile } = data;
+	const studentName = profile.studentName;
+	const isSendDisabled = !isConnected || isAiTyping || streamingMessage !== null;
 
 	const chatPanel = (
 		<div className="flex h-full flex-col rounded-2xl bg-white">
 			<div className="flex-1 space-y-6 overflow-y-auto p-5 md:p-8">
-				{MOCK_MESSAGES.map((msg) => (
+				{messages.map((msg) => (
 					<ChatBubble key={msg.id} {...msg} />
 				))}
+
+				{streamingMessage !== null && (
+					<ChatBubble
+						sender="ai"
+						senderName="Genius Guide"
+						message={streamingMessage || "\u00A0"}
+						timestamp={formatTime(new Date())}
+						className="animate-in fade-in"
+					/>
+				)}
+
+				{isAiTyping && <TypingIndicator />}
+
+				<div ref={messagesEndRef} />
 			</div>
 			<ChatInput
 				value={inputValue}
 				onChange={setInputValue}
-				onSend={() => {
-					// TODO: handle send
-					setInputValue("");
-				}}
+				onSend={handleSend}
+				placeholder={
+					isSendDisabled
+						? "Waiting for response..."
+						: "Type your message here..."
+				}
 			/>
 		</div>
 	);
@@ -77,9 +227,9 @@ export default function ConversationPage() {
 	const profilePanel = (
 		<div className="rounded-2xl bg-white p-5 md:p-8">
 			<ProfileProgress
-				studentName="Sarah"
-				percentComplete={42}
-				sections={MOCK_SECTIONS}
+				studentName={studentName}
+				percentComplete={profile.percentComplete}
+				sections={profile.sections}
 			/>
 		</div>
 	);
@@ -90,8 +240,8 @@ export default function ConversationPage() {
 				className="relative z-20"
 				actions={[
 					{
-						label: "Sarah's Genius Profile 42% Complete",
-						href: "/conversation",
+						label: `${studentName}'s Genius Profile ${profile.percentComplete}% Complete`,
+						href: `/conversation/${id}`,
 						variant: "orange",
 					},
 					{ label: "Help", href: "/help", variant: "outlined" },
@@ -135,13 +285,13 @@ export default function ConversationPage() {
 				</svg>
 			</div>
 
-			{/* ── Desktop: side-by-side panels ── */}
+			{/* Desktop: side-by-side panels */}
 			<div className="relative z-10 hidden flex-1 gap-5 p-5 md:flex lg:gap-6 lg:p-6">
 				<div className="flex w-3/5 flex-col">{chatPanel}</div>
 				<div className="w-2/5 overflow-y-auto">{profilePanel}</div>
 			</div>
 
-			{/* ── Mobile: Radix Tabs ── */}
+			{/* Mobile: Radix Tabs */}
 			<Tabs.Root
 				defaultValue="chat"
 				className="relative z-10 flex flex-1 flex-col md:hidden"

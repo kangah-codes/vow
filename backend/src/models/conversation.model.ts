@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document, Types } from "mongoose";
 
 export interface IMessage {
+	_id?: Types.ObjectId;
 	sender: "ai" | "user";
 	senderName: string;
 	message: string;
