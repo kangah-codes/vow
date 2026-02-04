@@ -49,3 +49,9 @@ next-env.d.ts
 **/dist-ssr/**
 **/build-ssr/**
 **/coverage/**
+
+**/venv/**
+**/__pycache__/**
+**/*.pyc
+**/*.pyo
+**/*.pyd

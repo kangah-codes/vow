@@ -9,11 +9,14 @@ export interface AuthRequest extends Request {
 export function requireAuth(
 	req: AuthRequest,
 	res: Response,
-	next: NextFunction
+	next: NextFunction,
 ): void {
 	const authHeader = req.headers.authorization;
 	if (!authHeader?.startsWith("Bearer ")) {
-		res.status(401).json({ success: false, error: "Authentication required" });
+		res.status(401).json({
+			success: false,
+			error: "You must be signed in to perform this action",
+		});
 		return;
 	}
 

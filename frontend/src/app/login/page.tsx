@@ -47,7 +47,7 @@ export default function LoginPage() {
 	return (
 		<div className="flex min-h-screen flex-col bg-brand-orange">
 			<Nav
-				backLink={{ label: "Back to Home", href: "/" }}
+				backLink={{ label: "Back", href: "/" }}
 				centerLogo
 				actions={[{ label: "Help", href: "/help", variant: "outlined" }]}
 			/>
@@ -103,10 +103,7 @@ export default function LoginPage() {
 						</div>
 					)}
 
-					<form
-						className="mt-10 space-y-5"
-						onSubmit={handleSubmit(onSubmit)}
-					>
+					<form className="mt-10 space-y-5" onSubmit={handleSubmit(onSubmit)}>
 						<div>
 							<input
 								type="email"

@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { apiFetch, ApiError } from "@/lib/api";
+import { apiFetch, ApiError, setLoggingOut } from "@/lib/api";
 import { clearAuthCookies } from "@/lib/cookies";
 
 interface LogoutResponse {
@@ -14,12 +14,22 @@ function getRefreshToken(): string | undefined {
 	return match?.[1];
 }
 
+function handleLogoutCleanup(
+	queryClient: ReturnType<typeof useQueryClient>,
+	router: ReturnType<typeof useRouter>,
+) {
+	clearAuthCookies();
+	queryClient.clear();
+	router.push("/login");
+}
+
 export function useLogout() {
 	const queryClient = useQueryClient();
 	const router = useRouter();
 
 	return useMutation<LogoutResponse, ApiError, void>({
 		mutationFn: async () => {
+			setLoggingOut(true);
 			const refreshToken = getRefreshToken();
 			return apiFetch<LogoutResponse>("/auth/logout", {
 				method: "POST",
@@ -27,15 +37,10 @@ export function useLogout() {
 			});
 		},
 		onSuccess: () => {
-			clearAuthCookies();
-			queryClient.clear();
-			router.push("/login");
+			handleLogoutCleanup(queryClient, router);
 		},
 		onError: () => {
-			// Even if the API call fails, clear local state
-			clearAuthCookies();
-			queryClient.clear();
-			router.push("/login");
+			handleLogoutCleanup(queryClient, router);
 		},
 	});
 }

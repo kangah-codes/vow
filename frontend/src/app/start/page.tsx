@@ -126,15 +126,11 @@ export default function StartPage() {
 						</div>
 					)}
 
-					<form
-						className="mt-8 space-y-5"
-						onSubmit={handleSubmit(onSubmit)}
-					>
+					<form className="mt-8 space-y-5" onSubmit={handleSubmit(onSubmit)}>
 						{/* Student's Name */}
 						<div>
 							<label className="text-sm font-bold text-brand-brown">
-								Student&apos;s Name{" "}
-								<span className="text-brand-orange">*</span>
+								Student&apos;s Name <span className="text-brand-orange">*</span>
 							</label>
 							<input
 								type="text"
@@ -155,8 +151,7 @@ export default function StartPage() {
 						<div className="grid gap-5 md:grid-cols-2">
 							<div>
 								<label className="text-sm font-bold text-brand-brown">
-									Grade Level{" "}
-									<span className="text-brand-orange">*</span>
+									Grade Level <span className="text-brand-orange">*</span>
 								</label>
 								<select
 									{...register("gradeLevel", {
@@ -196,9 +191,7 @@ export default function StartPage() {
 									{...register("age")}
 									className="mt-1.5 h-14 w-full appearance-none rounded-lg border border-brand-cream bg-white px-4 text-base text-brand-brown outline-none transition focus:border-brand-brown/40"
 								>
-									<option value="">
-										Select age
-									</option>
+									<option value="">Select age</option>
 									{Array.from({ length: 15 }, (_, i) => i + 4).map((a) => (
 										<option key={a} value={a}>
 											{a}
@@ -224,8 +217,7 @@ export default function StartPage() {
 						{/* Relationship */}
 						<div>
 							<label className="text-sm font-bold text-brand-brown">
-								Your Relationship{" "}
-								<span className="text-brand-orange">*</span>
+								Your Relationship <span className="text-brand-orange">*</span>
 							</label>
 							<select
 								{...register("relationship", {
@@ -285,7 +277,7 @@ export default function StartPage() {
 							className="inline-flex items-center gap-1.5 text-sm font-semibold uppercase tracking-wider text-brand-orange transition-colors hover:text-brand-orange/80"
 						>
 							<span aria-hidden="true">&larr;</span>
-							Back to Home
+							Back
 						</Link>
 					</div>
 				</div>

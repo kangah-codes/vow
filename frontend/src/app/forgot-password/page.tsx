@@ -10,7 +10,7 @@ export default function ForgotPasswordPage() {
 	return (
 		<div className="flex min-h-screen flex-col bg-brand-orange">
 			<Nav
-				backLink={{ label: "Back to Home", href: "/" }}
+				backLink={{ label: "Back", href: "/" }}
 				centerLogo
 				actions={[{ label: "Help", href: "/help", variant: "outlined" }]}
 			/>

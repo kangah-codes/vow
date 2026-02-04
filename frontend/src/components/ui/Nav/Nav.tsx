@@ -15,7 +15,7 @@ export type NavAction = {
 };
 
 export type NavProps = {
-	/** Optional back link shown on the left (e.g. "← BACK TO HOME") */
+	/** Optional back link shown on the left (e.g. "← Back") */
 	backLink?: { label: string; href: string };
 	/** When true, the logo + brand is centered instead of left-aligned */
 	centerLogo?: boolean;
@@ -186,9 +186,9 @@ export function Nav({
 							</button>
 						</Dialog.Trigger>
 						<Dialog.Portal>
-							<Dialog.Overlay className="fixed inset-0 z-50 bg-black/30" />
-							<Dialog.Content
-								className="fixed inset-y-0 right-0 z-50 w-72 max-w-[85vw] bg-white p-6 shadow-xl outline-none"
+						<Dialog.Overlay className="fixed inset-0 z-50 bg-black/30 data-[state=open]:[animation:var(--animate-dialog-fade-in)] data-[state=closed]:[animation:var(--animate-dialog-fade-out)]" />
+						<Dialog.Content
+							className="fixed inset-y-0 right-0 z-50 w-72 max-w-[85vw] bg-white p-6 shadow-xl outline-none data-[state=open]:[animation:var(--animate-dialog-slide-in)] data-[state=closed]:[animation:var(--animate-dialog-slide-out)]"
 								aria-label="Mobile menu"
 							>
 								<div className="flex items-center justify-between">

@@ -4,7 +4,12 @@ import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useParams } from "next/navigation";
 import * as Tabs from "@radix-ui/react-tabs";
 import { Nav } from "@/components/ui/Nav";
-import { ChatBubble, ChatInput, TypingIndicator } from "@/components/ui/Chat";
+import {
+	ChatBubble,
+	ChatInput,
+	ChatSkeleton,
+	TypingIndicator,
+} from "@/components/ui/Chat";
 import { ProfileProgress } from "@/components/ui/ProfileProgress";
 import { useConversation } from "@/lib/hooks/useConversation";
 
@@ -56,12 +61,10 @@ export default function ConversationPage() {
 	const scrollContainerRef = useRef<HTMLDivElement>(null);
 	const hasJoined = useRef(false);
 
-	// Update messages when initial messages change
 	useEffect(() => {
 		setMessages(initialMessages);
 	}, [initialMessages]);
 
-	// Auto-scroll to bottom
 	useEffect(() => {
 		messagesEndRef.current?.scrollIntoView({
 			behavior: "smooth",
@@ -69,7 +72,6 @@ export default function ConversationPage() {
 		});
 	}, [messages, streamingMessage, isAiTyping]);
 
-	// WebSocket connection
 	useEffect(() => {
 		if (!id || !data) return;
 
@@ -171,22 +173,85 @@ export default function ConversationPage() {
 
 	if (isLoading) {
 		return (
-			<div className="flex min-h-screen items-center justify-center bg-brand-brown">
-				<div className="text-lg font-semibold text-white/70">
-					Loading conversation...
+			<div className="relative flex h-screen flex-col bg-brand-brown isolate overflow-hidden">
+				<Nav
+					className="relative z-20 shrink-0"
+					actions={[{ label: "Help", href: "/help", variant: "outlined" }]}
+				/>
+
+				{/* Decorative swooshes */}
+				<div
+					className="pointer-events-none absolute inset-0 z-0 overflow-hidden"
+					aria-hidden="true"
+				>
+					<svg
+						className="absolute -left-32 -top-20 h-200 w-300"
+						viewBox="0 0 1200 800"
+						fill="none"
+						preserveAspectRatio="none"
+					>
+						<path
+							d="M-100 200C100 400 300 0 500 200C700 400 900 100 1100 300"
+							stroke="#DB4733"
+							strokeWidth="80"
+							strokeLinecap="round"
+							fill="none"
+							opacity="0.5"
+						/>
+					</svg>
+					<svg
+						className="absolute -bottom-32 -right-48 h-200 w-300"
+						viewBox="0 0 1200 800"
+						fill="none"
+						preserveAspectRatio="none"
+					>
+						<path
+							d="M400 0C500 200 700 400 800 200C900 0 1100 300 1300 100C1300 100 1200 500 1000 600"
+							stroke="#DB4733"
+							strokeWidth="80"
+							strokeLinecap="round"
+							fill="none"
+							opacity="0.4"
+						/>
+					</svg>
+				</div>
+
+				{/* Desktop skeleton */}
+				<div className="relative z-10 hidden flex-1 gap-5 p-5 md:flex lg:gap-6 lg:p-6 min-h-0">
+					<div className="flex w-3/5 flex-col h-full">
+						<ChatSkeleton />
+					</div>
+					<div className="w-2/5 h-full">
+						<div className="h-full rounded-2xl bg-white backdrop-blur-sm p-5 md:p-8 space-y-4">
+							<div className="h-5 w-32 animate-pulse rounded bg-gray-200" />
+							<div className="h-3 w-full animate-pulse rounded bg-gray-200" />
+							<div className="h-3 w-3/4 animate-pulse rounded bg-gray-200" />
+							<div className="mt-6 space-y-3">
+								{[1, 2, 3, 4].map((i) => (
+									<div
+										key={i}
+										className="h-10 w-full animate-pulse rounded-lg bg-gray-200"
+									/>
+								))}
+							</div>
+						</div>
+					</div>
+				</div>
+
+				{/* Mobile skeleton */}
+				<div className="relative z-10 flex flex-1 flex-col p-4 md:hidden min-h-0">
+					<ChatSkeleton />
 				</div>
 			</div>
 		);
 	}
 
-	if (error || !data) {
-		return (
-			<div className="flex min-h-screen items-center justify-center bg-brand-brown">
-				<div className="text-lg font-semibold text-white/70">
-					{error?.message || "Conversation not found"}
-				</div>
-			</div>
-		);
+	if (error) {
+		throw error;
+	}
+
+	if (!data) {
+		throw new Error("Conversation not found");
 	}
 
 	const { profile } = data;
@@ -194,10 +259,8 @@ export default function ConversationPage() {
 	const isSendDisabled =
 		!isConnected || isAiTyping || streamingMessage !== null;
 
-	// --- FIXED CHAT PANEL ---
 	const chatPanel = (
 		<div className="flex h-full flex-col rounded-2xl bg-white min-h-0">
-			{/* Scrollable Area */}
 			<div
 				ref={scrollContainerRef}
 				className="flex-1 space-y-6 overflow-y-auto p-5 md:p-8 min-h-0"
@@ -237,7 +300,6 @@ export default function ConversationPage() {
 		</div>
 	);
 
-	// --- FIXED PROFILE PANEL ---
 	const profilePanel = (
 		<div className="h-full rounded-2xl bg-white p-5 md:p-8 overflow-y-auto">
 			<ProfileProgress
@@ -249,13 +311,12 @@ export default function ConversationPage() {
 	);
 
 	return (
-		/* FIXED: Changed min-h-screen to h-screen and added overflow-hidden */
 		<div className="relative flex h-screen flex-col bg-brand-brown isolate overflow-hidden">
 			<Nav
 				className="relative z-20 shrink-0"
 				actions={[
 					{
-						label: `${studentName}'s Genius Summary ${profile.percentComplete}% Complete`,
+						label: `${profile.percentComplete}% Complete`,
 						href: `/conversation/${id}`,
 						variant: "orange",
 					},

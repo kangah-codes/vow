@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { OfflineDetector } from "@/components/ui/OfflineDetector";
 import { Providers } from "@/lib/providers";
 import "./globals.css";
@@ -39,8 +40,10 @@ export default function RootLayout({
 			</head>
 			<body className={`${inter.variable} antialiased`}>
 				<Providers>
-					{/* <OfflineDetector /> */}
-					{children}
+					<ErrorBoundary>
+						{/* <OfflineDetector /> */}
+						{children}
+					</ErrorBoundary>
 				</Providers>
 			</body>
 		</html>

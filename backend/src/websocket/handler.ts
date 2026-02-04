@@ -66,7 +66,9 @@ export function handleWebSocketConnection(
 						ws.send(
 							JSON.stringify({
 								type: "error",
-								payload: { message: "Authentication required" },
+								payload: {
+									message: "You must be signed in to perform this action",
+								},
 							}),
 						);
 						ws.close();
@@ -120,9 +122,7 @@ export function handleWebSocketConnection(
 						}),
 					);
 
-					logger.info(
-						`User ${userId} joined conversation ${conversationId}`,
-					);
+					logger.info(`User ${userId} joined conversation ${conversationId}`);
 					break;
 				}
 
@@ -140,8 +140,7 @@ export function handleWebSocketConnection(
 					const userMessage = message.payload.message;
 					if (!userMessage || !userMessage.trim()) return;
 
-					const conversation =
-						await Conversation.findById(conversationId);
+					const conversation = await Conversation.findById(conversationId);
 					if (!conversation) return;
 
 					const userMsg = {
@@ -197,8 +196,7 @@ export function handleWebSocketConnection(
 							);
 						}
 
-						const conv =
-							await Conversation.findById(conversationId);
+						const conv = await Conversation.findById(conversationId);
 						if (!conv) return;
 
 						const aiMsg = {
@@ -210,8 +208,7 @@ export function handleWebSocketConnection(
 						conv.messages.push(aiMsg);
 						await conv.save();
 
-						const savedAiMsg =
-							conv.messages[conv.messages.length - 1];
+						const savedAiMsg = conv.messages[conv.messages.length - 1];
 
 						ws.send(
 							JSON.stringify({
@@ -245,9 +242,7 @@ export function handleWebSocketConnection(
 	});
 
 	ws.on("close", () => {
-		logger.info(
-			`WebSocket connection closed for user ${userId || "unknown"}`,
-		);
+		logger.info(`WebSocket connection closed for user ${userId || "unknown"}`);
 	});
 
 	ws.on("error", (error) => {

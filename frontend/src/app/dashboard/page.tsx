@@ -213,34 +213,10 @@ function ProfilesCarousel({ profiles }: { profiles: Profile[] }) {
 
 	return (
 		<div className="relative mt-6">
-			{/* Left Arrow */}
-			<button
-				onClick={() => scroll("left")}
-				className="absolute left-0 top-1/2 z-10 -translate-y-1/2 -translate-x-4 hidden md:flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-lg border border-stone-200 text-brand-brown transition-all hover:bg-brand-brown hover:text-white hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
-				aria-label="Scroll left"
-			>
-				<svg
-					width="20"
-					height="20"
-					viewBox="0 0 24 24"
-					fill="none"
-					stroke="currentColor"
-					strokeWidth="2.5"
-					strokeLinecap="round"
-					strokeLinejoin="round"
-				>
-					<path d="M15 18l-6-6 6-6" />
-				</svg>
-			</button>
-
 			{/* Scrollable Container */}
 			<div
 				ref={scrollContainerRef}
-				className="flex items-stretch gap-4 overflow-x-auto scrollbar-hide snap-x snap-mandatory scroll-smooth pb-4"
-				style={{
-					scrollbarWidth: "none",
-					msOverflowStyle: "none",
-				}}
+				className="flex items-stretch gap-4 overflow-x-scroll snap-x snap-mandatory scroll-smooth pb-4"
 			>
 				{profiles.map((profile) => (
 					<div
@@ -251,31 +227,9 @@ function ProfilesCarousel({ profiles }: { profiles: Profile[] }) {
 					</div>
 				))}
 			</div>
-
-			{/* Right Arrow */}
-			<button
-				onClick={() => scroll("right")}
-				className="absolute right-0 top-1/2 z-10 -translate-y-1/2 translate-x-4 hidden md:flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-lg border border-stone-200 text-brand-brown transition-all hover:bg-brand-brown hover:text-white hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
-				aria-label="Scroll right"
-			>
-				<svg
-					width="20"
-					height="20"
-					viewBox="0 0 24 24"
-					fill="none"
-					stroke="currentColor"
-					strokeWidth="2.5"
-					strokeLinecap="round"
-					strokeLinejoin="round"
-				>
-					<path d="M9 18l6-6-6-6" />
-				</svg>
-			</button>
 		</div>
 	);
 }
-
-/* ── Account Settings ── */
 
 function AccountSettings({
 	name,
@@ -354,13 +308,7 @@ export default function DashboardPage() {
 	const { data: profiles, isLoading: profilesLoading } = useProfiles();
 	const { mutate: logout } = useLogout();
 
-	if (userLoading || profilesLoading) {
-		return (
-			<div className="flex min-h-screen items-center justify-center bg-white">
-				<p className="text-brand-brown/60">Loading...</p>
-			</div>
-		);
-	}
+	const isLoading = userLoading || profilesLoading;
 
 	return (
 		<div className="flex min-h-screen flex-col bg-white">
@@ -406,7 +354,30 @@ export default function DashboardPage() {
 						Your Profiles
 					</h2>
 
-					{profiles && profiles.length > 0 ? (
+					{isLoading ? (
+						<div className="mt-6 flex items-stretch gap-4 overflow-hidden pb-4">
+							{[1, 2, 3].map((i) => (
+								<div
+									key={i}
+									className="flex-none w-full md:w-[calc(33.333%-0.667rem)] rounded-xl border border-stone-200 bg-white p-5"
+								>
+									<div className="flex items-start justify-between gap-3">
+										<div className="h-5 w-28 animate-pulse rounded bg-gray-200" />
+										<div className="h-6 w-20 animate-pulse rounded-full bg-gray-200" />
+									</div>
+									<div className="mt-2 h-3 w-40 animate-pulse rounded bg-gray-100" />
+									<div className="mt-4">
+										<div className="h-2 w-full animate-pulse rounded-full bg-gray-100" />
+										<div className="mt-1.5 h-3 w-20 animate-pulse rounded bg-gray-100" />
+									</div>
+									<div className="mt-4 flex gap-2">
+										<div className="h-9 w-20 animate-pulse rounded-full bg-gray-200" />
+										<div className="h-9 w-24 animate-pulse rounded-full bg-gray-100" />
+									</div>
+								</div>
+							))}
+						</div>
+					) : profiles && profiles.length > 0 ? (
 						<ProfilesCarousel profiles={profiles} />
 					) : (
 						<div className="mt-6 flex flex-col items-center rounded-xl border-2 border-dashed border-stone-200 px-6 py-16 text-center">
@@ -448,11 +419,28 @@ export default function DashboardPage() {
 
 				{/* Account Settings */}
 				<div className="mt-12">
-					<AccountSettings
-						name={user ? `${user.firstName} ${user.lastName}` : ""}
-						email={user ? user.email : ""}
-						role={user ? user.role : ""}
-					/>
+					{isLoading ? (
+						<section className="rounded-xl border border-stone-200 bg-white p-5 md:p-8">
+							<div className="h-6 w-40 animate-pulse rounded bg-gray-200" />
+							<div className="mt-6 divide-y divide-stone-100">
+								{[1, 2, 3, 4].map((i) => (
+									<div key={i} className="py-4 first:pt-0">
+										<div className="h-3 w-16 animate-pulse rounded bg-gray-200" />
+										<div className="mt-2 h-3 w-48 animate-pulse rounded bg-gray-100" />
+										{i < 4 && (
+											<div className="mt-2 h-3 w-20 animate-pulse rounded bg-gray-100" />
+										)}
+									</div>
+								))}
+							</div>
+						</section>
+					) : (
+						<AccountSettings
+							name={user ? `${user.firstName} ${user.lastName}` : ""}
+							email={user ? user.email : ""}
+							role={user ? user.role : ""}
+						/>
+					)}
 				</div>
 			</main>
 		</div>
