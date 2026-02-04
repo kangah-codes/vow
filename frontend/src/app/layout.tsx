@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { OfflineDetector } from "@/components/ui/OfflineDetector";
+import { Providers } from "@/lib/providers";
 import "./globals.css";
 
 const inter = Inter({
@@ -37,8 +38,10 @@ export default function RootLayout({
 				/>
 			</head>
 			<body className={`${inter.variable} antialiased`}>
-				<OfflineDetector />
-				{children}
+				<Providers>
+					{/* <OfflineDetector /> */}
+					{children}
+				</Providers>
 			</body>
 		</html>
 	);

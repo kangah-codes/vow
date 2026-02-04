@@ -1,13 +1,48 @@
 "use client";
 
-import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Nav } from "@/components/ui/Nav";
+import { useLogin } from "@/lib/hooks/useLogin";
+import { setAuthCookies } from "@/lib/cookies";
+
+interface LoginFormData {
+	email: string;
+	password: string;
+	remember: boolean;
+}
 
 export default function LoginPage() {
-	const [email, setEmail] = useState("");
-	const [password, setPassword] = useState("");
-	const [remember, setRemember] = useState(false);
+	const router = useRouter();
+	const searchParams = useSearchParams();
+	const login = useLogin();
+
+	const {
+		register,
+		handleSubmit,
+		formState: { errors },
+	} = useForm<LoginFormData>({
+		defaultValues: { remember: false },
+	});
+
+	const onSubmit = (data: LoginFormData) => {
+		login.mutate(
+			{ email: data.email, password: data.password },
+			{
+				onSuccess: (result) => {
+					setAuthCookies(result.data.accessToken, result.data.refreshToken);
+					const redirect = searchParams.get("redirect") || "/dashboard";
+					router.push(redirect);
+				},
+			},
+		);
+	};
+
+	const inputClass =
+		"h-14 w-full rounded-lg border border-brand-cream bg-white px-4 text-base text-brand-brown outline-none transition placeholder:text-brand-brown/40 focus:border-brand-brown/40";
+	const errorInputClass =
+		"h-14 w-full rounded-lg border border-red-400 bg-white px-4 text-base text-brand-brown outline-none transition placeholder:text-brand-brown/40 focus:border-red-400";
 
 	return (
 		<div className="flex min-h-screen flex-col bg-brand-orange">
@@ -62,39 +97,55 @@ export default function LoginPage() {
 						Login
 					</h1>
 
+					{login.error && (
+						<div className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
+							{login.error.message}
+						</div>
+					)}
+
 					<form
 						className="mt-10 space-y-5"
-						onSubmit={(e) => {
-							e.preventDefault();
-							// TODO: handle login
-						}}
+						onSubmit={handleSubmit(onSubmit)}
 					>
 						<div>
 							<input
 								type="email"
 								placeholder="Email"
-								value={email}
-								onChange={(e) => setEmail(e.target.value)}
-								required
-								className="h-14 w-full rounded-lg border border-brand-cream bg-white px-4 text-base text-brand-brown outline-none transition placeholder:text-brand-brown/40 focus:border-brand-brown/40"
+								{...register("email", {
+									required: "Email is required",
+									pattern: {
+										value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+										message: "Please enter a valid email",
+									},
+								})}
+								className={errors.email ? errorInputClass : inputClass}
 							/>
+							{errors.email && (
+								<p className="mt-1.5 text-sm text-red-600">
+									{errors.email.message}
+								</p>
+							)}
 						</div>
 						<div>
 							<input
 								type="password"
 								placeholder="Password"
-								value={password}
-								onChange={(e) => setPassword(e.target.value)}
-								required
-								className="h-14 w-full rounded-lg border border-brand-cream bg-white px-4 text-base text-brand-brown outline-none transition placeholder:text-brand-brown/40 focus:border-brand-brown/40"
+								{...register("password", {
+									required: "Password is required",
+								})}
+								className={errors.password ? errorInputClass : inputClass}
 							/>
+							{errors.password && (
+								<p className="mt-1.5 text-sm text-red-600">
+									{errors.password.message}
+								</p>
+							)}
 						</div>
 
 						<label className="flex items-center gap-2.5 text-sm text-brand-brown">
 							<input
 								type="checkbox"
-								checked={remember}
-								onChange={(e) => setRemember(e.target.checked)}
+								{...register("remember")}
 								className="size-5 rounded border-brand-cream accent-brand-brown"
 							/>
 							Remember Me
@@ -102,9 +153,10 @@ export default function LoginPage() {
 
 						<button
 							type="submit"
-							className="flex h-13 w-full items-center justify-center rounded-full bg-brand-brown text-base font-bold uppercase tracking-wider text-white transition-colors hover:bg-brand-brown/90"
+							disabled={login.isPending}
+							className="flex h-13 w-full items-center justify-center rounded-full bg-brand-brown text-base font-bold uppercase tracking-wider text-white transition-colors hover:bg-brand-brown/90 disabled:opacity-60"
 						>
-							Login
+							{login.isPending ? "Logging in..." : "Login"}
 						</button>
 					</form>
 
