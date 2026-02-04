@@ -6,6 +6,7 @@ import {
 	logout,
 	forgotPassword,
 	resetPassword,
+	updateFocusGroup,
 } from "../controllers/auth.controller";
 import { requireAuth } from "../middleware/auth.middleware";
 
@@ -17,5 +18,6 @@ router.get("/me", requireAuth, getMe);
 router.post("/logout", requireAuth, logout);
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password/:token", resetPassword);
+router.post("/focus-group", requireAuth, updateFocusGroup);
 
 export default router;

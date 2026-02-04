@@ -8,6 +8,7 @@ import { useCurrentUser } from "@/lib/hooks/useCurrentUser";
 import { useProfiles, type Profile } from "@/lib/hooks/useProfiles";
 import { useLogout } from "@/lib/hooks/useLogout";
 import { useDeleteProfile } from "@/lib/hooks/useDeleteProfile";
+import { useFocusGroupPrompt } from "@/lib/hooks/useFocusGroupPrompt";
 
 /* ── Types ── */
 
@@ -189,7 +190,12 @@ function ProfileCardComponent({
 								Share Code
 							</button>
 						) : (
-							<AlertDialog.Root open={dialogOpen} onOpenChange={setDialogOpen}>
+							<AlertDialog.Root
+								open={dialogOpen}
+								onOpenChange={(open) => {
+									if (!isDeleting) setDialogOpen(open);
+								}}
+							>
 								<AlertDialog.Trigger asChild>
 									<button
 										type="button"
@@ -200,7 +206,12 @@ function ProfileCardComponent({
 								</AlertDialog.Trigger>
 								<AlertDialog.Portal>
 									<AlertDialog.Overlay className="fixed inset-0 z-50 bg-black/40 data-[state=open]:animate-in data-[state=open]:fade-in data-[state=closed]:animate-out data-[state=closed]:fade-out" />
-									<AlertDialog.Content className="fixed left-1/2 top-1/2 z-50 w-[90vw] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-white p-6 shadow-xl md:p-8">
+									<AlertDialog.Content
+										className="fixed left-1/2 top-1/2 z-50 w-[90vw] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-white p-6 shadow-xl md:p-8"
+										onEscapeKeyDown={(e) => {
+											if (isDeleting) e.preventDefault();
+										}}
+									>
 										<AlertDialog.Title className="font-display text-xl font-bold text-brand-brown">
 											Delete Profile
 										</AlertDialog.Title>
@@ -216,21 +227,44 @@ function ProfileCardComponent({
 											<AlertDialog.Cancel asChild>
 												<button
 													type="button"
-													className="inline-flex h-10 items-center justify-center rounded-full border border-brand-brown px-5 text-xs font-bold uppercase tracking-wider text-brand-brown transition-colors hover:bg-brand-brown/5"
+													disabled={isDeleting}
+													className="inline-flex h-10 items-center justify-center rounded-full border border-brand-brown px-5 text-xs font-bold uppercase tracking-wider text-brand-brown transition-colors hover:bg-brand-brown/5 disabled:opacity-40"
 												>
 													Cancel
 												</button>
 											</AlertDialog.Cancel>
-											<AlertDialog.Action asChild>
-												<button
-													type="button"
-													disabled={isDeleting}
-													onClick={() => onDelete(profile._id)}
-													className="inline-flex h-10 items-center justify-center rounded-full bg-red-600 px-5 text-xs font-bold uppercase tracking-wider text-white transition-colors hover:bg-red-700 disabled:opacity-60"
-												>
-													{isDeleting ? "Deleting..." : "Delete Profile"}
-												</button>
-											</AlertDialog.Action>
+											<button
+												type="button"
+												disabled={isDeleting}
+												onClick={() => onDelete(profile._id)}
+												className="inline-flex h-10 items-center justify-center gap-2 rounded-full bg-red-600 px-5 text-xs font-bold uppercase tracking-wider text-white transition-colors hover:bg-red-700 disabled:opacity-60"
+											>
+												{isDeleting && (
+													<svg
+														className="h-4 w-4 animate-spin"
+														viewBox="0 0 24 24"
+														fill="none"
+														aria-hidden="true"
+													>
+														<circle
+															cx="12"
+															cy="12"
+															r="10"
+															stroke="currentColor"
+															strokeWidth="3"
+															className="opacity-25"
+														/>
+														<path
+															d="M4 12a8 8 0 018-8"
+															stroke="currentColor"
+															strokeWidth="3"
+															strokeLinecap="round"
+															className="opacity-75"
+														/>
+													</svg>
+												)}
+												{isDeleting ? "Deleting..." : "Delete Profile"}
+											</button>
 										</div>
 									</AlertDialog.Content>
 								</AlertDialog.Portal>
@@ -357,7 +391,14 @@ export default function DashboardPage() {
 	const { data: profiles, isLoading: profilesLoading } = useProfiles();
 	const { mutate: logout } = useLogout();
 	const deleteProfile = useDeleteProfile();
+	const focusGroupPrompt = useFocusGroupPrompt();
 	const [deletingId, setDeletingId] = useState<string | null>(null);
+	const [focusGroupChoice, setFocusGroupChoice] = useState<boolean | null>(
+		null,
+	);
+
+	const showFocusGroupDialog =
+		!userLoading && user && user.focusGroupPrompted === false;
 
 	const handleDelete = (profileId: string) => {
 		setDeletingId(profileId);
@@ -505,6 +546,103 @@ export default function DashboardPage() {
 					)}
 				</div>
 			</main>
+
+			{/* Focus Group Opt-In Dialog — shown once on first login */}
+			<AlertDialog.Root
+				open={!!showFocusGroupDialog}
+				onOpenChange={() => {
+					/* prevent dismissal */
+				}}
+			>
+				<AlertDialog.Portal>
+					<AlertDialog.Overlay className="fixed inset-0 z-50 bg-black/40 data-[state=open]:animate-in data-[state=open]:fade-in data-[state=closed]:animate-out data-[state=closed]:fade-out" />
+					<AlertDialog.Content
+						className="fixed left-1/2 top-1/2 z-50 w-[90vw] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-white p-6 shadow-xl md:p-8"
+						onEscapeKeyDown={(e) => e.preventDefault()}
+					>
+						<AlertDialog.Title className="font-display text-xl font-bold text-brand-brown">
+							Join Our Focus Group?
+						</AlertDialog.Title>
+						<AlertDialog.Description className="mt-3 text-sm leading-relaxed text-brand-brown/70">
+							We&apos;re looking for participants to help shape the future of
+							Village of Wisdom. Would you like to opt in to our focus group?
+							Your feedback will help us improve the experience for everyone.
+						</AlertDialog.Description>
+						<div className="mt-6 flex justify-end gap-3">
+							<button
+								type="button"
+								disabled={focusGroupPrompt.isPending}
+								onClick={() => {
+									setFocusGroupChoice(false);
+									focusGroupPrompt.mutate(false);
+								}}
+								className="inline-flex h-10 items-center justify-center gap-2 rounded-full border border-brand-brown px-5 text-xs font-bold uppercase tracking-wider text-brand-brown transition-colors hover:bg-brand-brown/5 disabled:opacity-40"
+							>
+								{focusGroupPrompt.isPending && focusGroupChoice === false && (
+									<svg
+										className="h-4 w-4 animate-spin"
+										viewBox="0 0 24 24"
+										fill="none"
+										aria-hidden="true"
+									>
+										<circle
+											cx="12"
+											cy="12"
+											r="10"
+											stroke="currentColor"
+											strokeWidth="3"
+											className="opacity-25"
+										/>
+										<path
+											d="M4 12a8 8 0 018-8"
+											stroke="currentColor"
+											strokeWidth="3"
+											strokeLinecap="round"
+											className="opacity-75"
+										/>
+									</svg>
+								)}
+								No Thanks
+							</button>
+							<button
+								type="button"
+								disabled={focusGroupPrompt.isPending}
+								onClick={() => {
+									setFocusGroupChoice(true);
+									focusGroupPrompt.mutate(true);
+								}}
+								className="inline-flex h-10 items-center justify-center gap-2 rounded-full bg-brand-brown px-5 text-xs font-bold uppercase tracking-wider text-white transition-colors hover:bg-brand-brown/90 disabled:opacity-60"
+							>
+								{focusGroupPrompt.isPending && focusGroupChoice === true && (
+									<svg
+										className="h-4 w-4 animate-spin"
+										viewBox="0 0 24 24"
+										fill="none"
+										aria-hidden="true"
+									>
+										<circle
+											cx="12"
+											cy="12"
+											r="10"
+											stroke="currentColor"
+											strokeWidth="3"
+											className="opacity-25"
+										/>
+										<path
+											d="M4 12a8 8 0 018-8"
+											stroke="currentColor"
+											strokeWidth="3"
+											strokeLinecap="round"
+											className="opacity-75"
+										/>
+									</svg>
+								)}
+								Yes, I&apos;m In
+							</button>
+						</div>
+					</AlertDialog.Content>
+				</AlertDialog.Portal>
+			</AlertDialog.Root>
 		</div>
 	);
 }

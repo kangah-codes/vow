@@ -325,7 +325,11 @@ export default function ConversationPage() {
 						href: `/conversation/${id}`,
 						variant: "orange",
 					},
-					{ label: "Help", href: "/help", variant: "outlined" },
+					{
+						label: "Continue Later",
+						href: `/dashboard`,
+						variant: "outlined",
+					},
 				]}
 			/>
 

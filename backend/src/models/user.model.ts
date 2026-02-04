@@ -10,6 +10,7 @@ export interface IUser extends Document {
 	avatar?: string;
 	agreedToTerms: boolean;
 	focusGroupOptIn: boolean;
+	focusGroupPrompted: boolean;
 	refreshTokens: string[];
 	resetToken?: string;
 	resetTokenExpiresAt?: Date;
@@ -59,6 +60,10 @@ const userSchema = new Schema<IUser>(
 			default: false,
 		},
 		focusGroupOptIn: {
+			type: Boolean,
+			default: false,
+		},
+		focusGroupPrompted: {
 			type: Boolean,
 			default: false,
 		},

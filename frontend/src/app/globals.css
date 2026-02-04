@@ -35,7 +35,8 @@
 
 	/* Dialog animations */
 	--animate-dialog-slide-in: dialog-slide-in 300ms cubic-bezier(0.16, 1, 0.3, 1);
-	--animate-dialog-slide-out: dialog-slide-out 200ms cubic-bezier(0.16, 1, 0.3, 1);
+	--animate-dialog-slide-out: dialog-slide-out 200ms
+		cubic-bezier(0.16, 1, 0.3, 1);
 	--animate-dialog-fade-in: dialog-fade-in 200ms ease-out;
 	--animate-dialog-fade-out: dialog-fade-out 200ms ease-out;
 }

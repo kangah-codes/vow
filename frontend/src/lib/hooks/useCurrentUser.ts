@@ -8,6 +8,7 @@ export interface CurrentUser {
 	lastName: string;
 	role: string;
 	focusGroupOptIn: boolean;
+	focusGroupPrompted: boolean;
 }
 
 interface MeResponse {

@@ -18,7 +18,6 @@ interface SignupFormData {
 	password: string;
 	confirmPassword: string;
 	agreedToTerms: boolean;
-	focusGroupOptIn: boolean;
 }
 
 export default function SignupPage() {
@@ -31,7 +30,6 @@ export default function SignupPage() {
 		formState: { errors },
 	} = useForm<SignupFormData>({
 		defaultValues: {
-			focusGroupOptIn: false,
 			agreedToTerms: false,
 		},
 	});
@@ -46,7 +44,6 @@ export default function SignupPage() {
 				lastName: data.lastName,
 				role: data.role,
 				agreedToTerms: data.agreedToTerms,
-				focusGroupOptIn: data.focusGroupOptIn,
 			},
 			{
 				onSuccess: (result) => {
@@ -280,19 +277,6 @@ export default function SignupPage() {
 								{errors.agreedToTerms.message}
 							</p>
 						)}
-
-						{/* Focus group opt-in */}
-						<label className="mt-4 flex items-start gap-2.5 text-sm text-brand-brown">
-							<input
-								type="checkbox"
-								{...register("focusGroupOptIn")}
-								className="mt-0.5 size-5 shrink-0 rounded border-brand-cream accent-brand-brown"
-							/>
-							<span>
-								I&apos;d like to participate in focus groups and provide
-								feedback to help improve the platform
-							</span>
-						</label>
 
 						{/* Submit */}
 						<button

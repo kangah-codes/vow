@@ -166,6 +166,7 @@ export async function getMe(req: AuthRequest, res: Response): Promise<void> {
 				lastName: user.lastName,
 				role: user.role,
 				focusGroupOptIn: user.focusGroupOptIn,
+				focusGroupPrompted: user.focusGroupPrompted,
 			},
 		});
 	} catch (error) {
@@ -303,6 +304,46 @@ export async function resetPassword(
 		res.status(500).json({
 			success: false,
 			error: "Failed to reset password",
+		});
+	}
+}
+
+export async function updateFocusGroup(
+	req: AuthRequest,
+	res: Response,
+): Promise<void> {
+	try {
+		const { optIn } = req.body;
+
+		if (typeof optIn !== "boolean") {
+			res.status(400).json({
+				success: false,
+				error: "optIn must be a boolean",
+			});
+			return;
+		}
+
+		const user = await User.findById(req.userId);
+		if (!user) {
+			res.status(404).json({ success: false, error: "User not found" });
+			return;
+		}
+
+		user.focusGroupOptIn = optIn;
+		user.focusGroupPrompted = true;
+		await user.save();
+
+		res.json({
+			success: true,
+			data: {
+				focusGroupOptIn: user.focusGroupOptIn,
+				focusGroupPrompted: user.focusGroupPrompted,
+			},
+		});
+	} catch (error) {
+		res.status(500).json({
+			success: false,
+			error: "Failed to update focus group preference",
 		});
 	}
 }
