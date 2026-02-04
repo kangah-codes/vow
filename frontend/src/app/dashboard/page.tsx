@@ -42,7 +42,7 @@ function formatGrade(gradeLevel: string): string {
 function StatusBadge({ status }: { status: ProfileStatus }) {
 	if (status === "complete") {
 		return (
-			<span className="inline-flex items-center gap-1 rounded-full bg-green-600 px-2.5 py-1 text-xs font-semibold text-white">
+			<span className="inline-flex items-center gap-1 rounded-md bg-green-600 px-2.5 py-1 text-xs font-semibold text-white">
 				<svg
 					width="12"
 					height="12"
@@ -62,7 +62,7 @@ function StatusBadge({ status }: { status: ProfileStatus }) {
 	}
 
 	return (
-		<span className="inline-flex items-center gap-1 rounded-full bg-brand-orange px-2.5 py-1 text-xs font-semibold text-white">
+		<span className="inline-flex items-center gap-1 rounded-md bg-brand-orange px-2.5 py-1 text-xs font-semibold text-white">
 			<svg
 				width="12"
 				height="12"
@@ -189,10 +189,7 @@ function ProfileCardComponent({
 								Share Code
 							</button>
 						) : (
-							<AlertDialog.Root
-								open={dialogOpen}
-								onOpenChange={setDialogOpen}
-							>
+							<AlertDialog.Root open={dialogOpen} onOpenChange={setDialogOpen}>
 								<AlertDialog.Trigger asChild>
 									<button
 										type="button"
@@ -212,10 +209,8 @@ function ProfileCardComponent({
 											<span className="font-semibold text-brand-brown">
 												{profile.studentName}&apos;s
 											</span>{" "}
-											profile? This will permanently
-											remove the profile and all
-											conversation history. This action
-											cannot be undone.
+											profile? This will permanently remove the profile and all
+											conversation history. This action cannot be undone.
 										</AlertDialog.Description>
 										<div className="mt-6 flex justify-end gap-3">
 											<AlertDialog.Cancel asChild>
@@ -230,14 +225,10 @@ function ProfileCardComponent({
 												<button
 													type="button"
 													disabled={isDeleting}
-													onClick={() =>
-														onDelete(profile._id)
-													}
+													onClick={() => onDelete(profile._id)}
 													className="inline-flex h-10 items-center justify-center rounded-full bg-red-600 px-5 text-xs font-bold uppercase tracking-wider text-white transition-colors hover:bg-red-700 disabled:opacity-60"
 												>
-													{isDeleting
-														? "Deleting..."
-														: "Delete Profile"}
+													{isDeleting ? "Deleting..." : "Delete Profile"}
 												</button>
 											</AlertDialog.Action>
 										</div>

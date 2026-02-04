@@ -57,8 +57,6 @@ export default function ConversationPage() {
 	const [isConnected, setIsConnected] = useState(false);
 
 	const wsRef = useRef<WebSocket | null>(null);
-	const messagesEndRef = useRef<HTMLDivElement>(null);
-	const scrollContainerRef = useRef<HTMLDivElement>(null);
 	const hasJoined = useRef(false);
 
 	useEffect(() => {
@@ -66,9 +64,16 @@ export default function ConversationPage() {
 	}, [initialMessages]);
 
 	useEffect(() => {
-		messagesEndRef.current?.scrollIntoView({
-			behavior: "smooth",
-			block: "end",
+		const containers = document.querySelectorAll<HTMLElement>(
+			"[data-chat-messages]",
+		);
+		containers.forEach((container) => {
+			if (container.offsetHeight > 0) {
+				container.scrollTo({
+					top: container.scrollHeight,
+					behavior: "smooth",
+				});
+			}
 		});
 	}, [messages, streamingMessage, isAiTyping]);
 
@@ -262,7 +267,7 @@ export default function ConversationPage() {
 	const chatPanel = (
 		<div className="flex h-full flex-col rounded-2xl bg-white min-h-0">
 			<div
-				ref={scrollContainerRef}
+				data-chat-messages
 				className="flex-1 space-y-6 overflow-y-auto p-5 md:p-8 min-h-0"
 			>
 				{messages.map((msg) => (
@@ -281,7 +286,7 @@ export default function ConversationPage() {
 
 				{isAiTyping && <TypingIndicator />}
 
-				<div ref={messagesEndRef} className="h-px w-full" />
+				<div className="h-px w-full" />
 			</div>
 
 			{/* Fixed Input Area */}
