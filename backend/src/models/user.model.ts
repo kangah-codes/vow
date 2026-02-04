@@ -11,6 +11,8 @@ export interface IUser extends Document {
 	agreedToTerms: boolean;
 	focusGroupOptIn: boolean;
 	refreshTokens: string[];
+	resetToken?: string;
+	resetTokenExpiresAt?: Date;
 	createdAt: Date;
 	updatedAt: Date;
 }
@@ -63,6 +65,12 @@ const userSchema = new Schema<IUser>(
 		refreshTokens: {
 			type: [String],
 			default: [],
+		},
+		resetToken: {
+			type: String,
+		},
+		resetTokenExpiresAt: {
+			type: Date,
 		},
 	},
 	{

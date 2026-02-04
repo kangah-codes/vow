@@ -35,12 +35,14 @@ export function ChatBubble({
 		>
 			{/* Avatar + name */}
 			<div
-				className={cn(
-					"flex items-center gap-2",
-					isUser && "flex-row-reverse",
-				)}
+				className={cn("flex items-center gap-2", isUser && "flex-row-reverse")}
 			>
-				<div className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-brand-orange md:size-10">
+				<div
+					className={cn(
+						isUser ? "bg-brand-blue" : "bg-brand-orange",
+						"flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full md:size-10",
+					)}
+				>
 					<Image
 						src={avatarSrc}
 						alt={`${senderName} avatar`}

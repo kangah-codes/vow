@@ -21,6 +21,10 @@ export type ActionCardProps = {
 		value: string;
 		onChange: (value: string) => void;
 	};
+	/** Show loading spinner on the button */
+	loading?: boolean;
+	/** Error message to display below the input */
+	error?: string | null;
 	className?: string;
 };
 
@@ -31,6 +35,8 @@ export function ActionCard({
 	buttonHref,
 	onButtonClick,
 	input,
+	loading = false,
+	error,
 	className,
 }: ActionCardProps) {
 	return (
@@ -48,13 +54,21 @@ export function ActionCard({
 			</p>
 
 			{input && (
-				<input
-					type="text"
-					placeholder={input.placeholder}
-					value={input.value}
-					onChange={(e) => input.onChange(e.target.value)}
-					className="mt-8 h-14 w-full max-w-md rounded-lg border border-brand-cream bg-white px-4 text-base text-brand-brown outline-none transition placeholder:text-brand-brown/40 focus:border-brand-brown/40 md:mt-10"
-				/>
+				<>
+					<input
+						type="text"
+						placeholder={input.placeholder}
+						value={input.value}
+						onChange={(e) => input.onChange(e.target.value)}
+						disabled={loading}
+						className="mt-8 h-14 w-full max-w-md rounded-lg border border-brand-cream bg-white px-4 text-base text-brand-brown outline-none transition placeholder:text-brand-brown/40 focus:border-brand-brown/40 disabled:opacity-50 md:mt-10"
+					/>
+					{error && (
+						<p className="mt-2 text-sm font-medium text-red-600">
+							{error}
+						</p>
+					)}
+				</>
 			)}
 
 			{buttonHref ? (
@@ -69,13 +83,50 @@ export function ActionCard({
 				<button
 					type="button"
 					onClick={onButtonClick}
-					className="mt-8 inline-flex h-13 items-center gap-2 rounded-full bg-brand-brown px-8 text-base font-bold uppercase tracking-wide text-white transition-colors hover:bg-brand-brown/90 md:mt-10"
+					disabled={loading}
+					className="mt-8 inline-flex h-13 items-center gap-2 rounded-full bg-brand-brown px-8 text-base font-bold uppercase tracking-wide text-white transition-colors hover:bg-brand-brown/90 disabled:opacity-60 md:mt-10"
 				>
-					{buttonLabel}
-					<ArrowRight />
+					{loading ? (
+						<>
+							<Spinner />
+							Checking...
+						</>
+					) : (
+						<>
+							{buttonLabel}
+							<ArrowRight />
+						</>
+					)}
 				</button>
 			)}
 		</div>
+	);
+}
+
+function Spinner() {
+	return (
+		<svg
+			className="h-5 w-5 animate-spin"
+			viewBox="0 0 24 24"
+			fill="none"
+			aria-hidden="true"
+		>
+			<circle
+				cx="12"
+				cy="12"
+				r="10"
+				stroke="currentColor"
+				strokeWidth="3"
+				className="opacity-25"
+			/>
+			<path
+				d="M4 12a8 8 0 018-8"
+				stroke="currentColor"
+				strokeWidth="3"
+				strokeLinecap="round"
+				className="opacity-75"
+			/>
+		</svg>
 	);
 }
 

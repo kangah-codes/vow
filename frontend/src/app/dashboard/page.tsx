@@ -1,11 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useRef } from "react";
+import { useRef, useState } from "react";
+import * as AlertDialog from "@radix-ui/react-alert-dialog";
 import { Nav } from "@/components/ui/Nav";
 import { useCurrentUser } from "@/lib/hooks/useCurrentUser";
 import { useProfiles, type Profile } from "@/lib/hooks/useProfiles";
 import { useLogout } from "@/lib/hooks/useLogout";
+import { useDeleteProfile } from "@/lib/hooks/useDeleteProfile";
 
 /* ── Types ── */
 
@@ -113,8 +115,17 @@ function ProgressBar({
 
 /* ── Profile Card ── */
 
-function ProfileCardComponent({ profile }: { profile: Profile }) {
+function ProfileCardComponent({
+	profile,
+	onDelete,
+	isDeleting,
+}: {
+	profile: Profile;
+	onDelete: (id: string) => void;
+	isDeleting: boolean;
+}) {
 	const isComplete = profile.status === "complete";
+	const [dialogOpen, setDialogOpen] = useState(false);
 
 	return (
 		<article
@@ -178,12 +189,61 @@ function ProfileCardComponent({ profile }: { profile: Profile }) {
 								Share Code
 							</button>
 						) : (
-							<button
-								type="button"
-								className="inline-flex h-9 items-center justify-center rounded-full border border-brand-brown px-4 text-xs font-bold uppercase tracking-wider text-brand-brown transition-colors hover:bg-brand-brown/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
+							<AlertDialog.Root
+								open={dialogOpen}
+								onOpenChange={setDialogOpen}
 							>
-								Delete
-							</button>
+								<AlertDialog.Trigger asChild>
+									<button
+										type="button"
+										className="inline-flex h-9 items-center justify-center rounded-full border border-red-300 px-4 text-xs font-bold uppercase tracking-wider text-red-600 transition-colors hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2"
+									>
+										Delete
+									</button>
+								</AlertDialog.Trigger>
+								<AlertDialog.Portal>
+									<AlertDialog.Overlay className="fixed inset-0 z-50 bg-black/40 data-[state=open]:animate-in data-[state=open]:fade-in data-[state=closed]:animate-out data-[state=closed]:fade-out" />
+									<AlertDialog.Content className="fixed left-1/2 top-1/2 z-50 w-[90vw] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-white p-6 shadow-xl md:p-8">
+										<AlertDialog.Title className="font-display text-xl font-bold text-brand-brown">
+											Delete Profile
+										</AlertDialog.Title>
+										<AlertDialog.Description className="mt-3 text-sm leading-relaxed text-brand-brown/70">
+											Are you sure you want to delete{" "}
+											<span className="font-semibold text-brand-brown">
+												{profile.studentName}&apos;s
+											</span>{" "}
+											profile? This will permanently
+											remove the profile and all
+											conversation history. This action
+											cannot be undone.
+										</AlertDialog.Description>
+										<div className="mt-6 flex justify-end gap-3">
+											<AlertDialog.Cancel asChild>
+												<button
+													type="button"
+													className="inline-flex h-10 items-center justify-center rounded-full border border-brand-brown px-5 text-xs font-bold uppercase tracking-wider text-brand-brown transition-colors hover:bg-brand-brown/5"
+												>
+													Cancel
+												</button>
+											</AlertDialog.Cancel>
+											<AlertDialog.Action asChild>
+												<button
+													type="button"
+													disabled={isDeleting}
+													onClick={() =>
+														onDelete(profile._id)
+													}
+													className="inline-flex h-10 items-center justify-center rounded-full bg-red-600 px-5 text-xs font-bold uppercase tracking-wider text-white transition-colors hover:bg-red-700 disabled:opacity-60"
+												>
+													{isDeleting
+														? "Deleting..."
+														: "Delete Profile"}
+												</button>
+											</AlertDialog.Action>
+										</div>
+									</AlertDialog.Content>
+								</AlertDialog.Portal>
+							</AlertDialog.Root>
 						)}
 					</>
 				)}
@@ -194,22 +254,16 @@ function ProfileCardComponent({ profile }: { profile: Profile }) {
 
 /* ── Profiles Carousel ── */
 
-function ProfilesCarousel({ profiles }: { profiles: Profile[] }) {
+function ProfilesCarousel({
+	profiles,
+	onDelete,
+	deletingId,
+}: {
+	profiles: Profile[];
+	onDelete: (id: string) => void;
+	deletingId: string | null;
+}) {
 	const scrollContainerRef = useRef<HTMLDivElement>(null);
-
-	const scroll = (direction: "left" | "right") => {
-		if (!scrollContainerRef.current) return;
-
-		const scrollAmount = 400;
-		const newScrollLeft =
-			scrollContainerRef.current.scrollLeft +
-			(direction === "left" ? -scrollAmount : scrollAmount);
-
-		scrollContainerRef.current.scrollTo({
-			left: newScrollLeft,
-			behavior: "smooth",
-		});
-	};
 
 	return (
 		<div className="relative mt-6">
@@ -223,7 +277,11 @@ function ProfilesCarousel({ profiles }: { profiles: Profile[] }) {
 						key={profile._id}
 						className="flex-none w-full md:w-[calc(33.333%-0.667rem)] snap-start"
 					>
-						<ProfileCardComponent profile={profile} />
+						<ProfileCardComponent
+							profile={profile}
+							onDelete={onDelete}
+							isDeleting={deletingId === profile._id}
+						/>
 					</div>
 				))}
 			</div>
@@ -307,6 +365,15 @@ export default function DashboardPage() {
 	const { data: user, isLoading: userLoading } = useCurrentUser();
 	const { data: profiles, isLoading: profilesLoading } = useProfiles();
 	const { mutate: logout } = useLogout();
+	const deleteProfile = useDeleteProfile();
+	const [deletingId, setDeletingId] = useState<string | null>(null);
+
+	const handleDelete = (profileId: string) => {
+		setDeletingId(profileId);
+		deleteProfile.mutate(profileId, {
+			onSettled: () => setDeletingId(null),
+		});
+	};
 
 	const isLoading = userLoading || profilesLoading;
 
@@ -378,7 +445,11 @@ export default function DashboardPage() {
 							))}
 						</div>
 					) : profiles && profiles.length > 0 ? (
-						<ProfilesCarousel profiles={profiles} />
+						<ProfilesCarousel
+							profiles={profiles}
+							onDelete={handleDelete}
+							deletingId={deletingId}
+						/>
 					) : (
 						<div className="mt-6 flex flex-col items-center rounded-xl border-2 border-dashed border-stone-200 px-6 py-16 text-center">
 							<div className="flex h-16 w-16 items-center justify-center rounded-full bg-brand-orange/10">

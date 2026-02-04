@@ -5,11 +5,13 @@ import { Nav } from "@/components/ui/Nav";
 import { ActionCard } from "@/components/ui/ActionCard";
 import { HowItWorksStep } from "@/components/ui/HowItWorksStep";
 import { useCurrentUser } from "@/lib/hooks/useCurrentUser";
+import { useValidateAccessCode } from "@/lib/hooks/useValidateAccessCode";
 import Image from "next/image";
 
 export default function Home() {
 	const [accessCode, setAccessCode] = useState("");
 	const { data: user } = useCurrentUser();
+	const { validate, isValidating, error } = useValidateAccessCode();
 
 	return (
 		<div className="min-h-screen bg-white">
@@ -87,11 +89,9 @@ export default function Home() {
 								value: accessCode,
 								onChange: setAccessCode,
 							}}
-							onButtonClick={() => {
-								if (accessCode.length === 8) {
-									window.location.href = `/resume?code=${accessCode}`;
-								}
-							}}
+							loading={isValidating}
+							error={error}
+							onButtonClick={() => validate(accessCode)}
 						/>
 					</div>
 				</div>

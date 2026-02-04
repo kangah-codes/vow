@@ -1,47 +1,37 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { useParams } from "next/navigation";
+import { useEffect, useMemo } from "react";
+import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
 import * as Tabs from "@radix-ui/react-tabs";
 import { Nav } from "@/components/ui/Nav";
-import {
-	ChatBubble,
-	ChatInput,
-	ChatSkeleton,
-	TypingIndicator,
-} from "@/components/ui/Chat";
+import { ChatBubble, ChatSkeleton } from "@/components/ui/Chat";
 import { ProfileProgress } from "@/components/ui/ProfileProgress";
-import { useConversation } from "@/lib/hooks/useConversation";
-
-const WS_URL = "ws://localhost:3001";
-
-interface ChatMsg {
-	id: string;
-	sender: "ai" | "user";
-	senderName: string;
-	message: string;
-	timestamp: string;
-}
+import { useSharedConversation } from "@/lib/hooks/useSharedConversation";
+import { useCurrentUser } from "@/lib/hooks/useCurrentUser";
 
 function formatTime(ts: string | Date): string {
 	const d = new Date(ts);
 	return d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
 }
 
-function getAccessToken(): string | undefined {
-	if (typeof document === "undefined") return undefined;
-	const match = document.cookie.match(/(?:^|; )accessToken=([^;]*)/);
-	return match?.[1];
-}
-
-export default function ConversationPage() {
+export default function SharedConversationPage() {
 	const params = useParams();
-	const id = params.id as string;
-	const { data, isLoading, error } = useConversation(id);
+	const code = params.code as string;
+	const router = useRouter();
+	const { data, isLoading, error } = useSharedConversation(code);
+	const { data: user } = useCurrentUser();
 
-	const initialMessages = useMemo(() => {
+	// If the logged-in user owns this conversation, redirect to the full chat
+	useEffect(() => {
+		if (data && user && data.conversation.userId === user.id) {
+			router.replace(`/conversation/${data.conversation._id}`);
+		}
+	}, [data, user, router]);
+
+	const messages = useMemo(() => {
 		if (!data?.conversation.messages) return [];
-		return data.conversation.messages.map((m) => ({
+		return data?.conversation.messages.map((m) => ({
 			id: m._id,
 			sender: m.sender,
 			senderName: m.senderName,
@@ -49,127 +39,6 @@ export default function ConversationPage() {
 			timestamp: formatTime(m.timestamp),
 		}));
 	}, [data?.conversation.messages]);
-
-	const [messages, setMessages] = useState<ChatMsg[]>(initialMessages);
-	const [inputValue, setInputValue] = useState("");
-	const [isAiTyping, setIsAiTyping] = useState(false);
-	const [streamingMessage, setStreamingMessage] = useState<string | null>(null);
-	const [isConnected, setIsConnected] = useState(false);
-
-	const wsRef = useRef<WebSocket | null>(null);
-	const messagesEndRef = useRef<HTMLDivElement>(null);
-	const scrollContainerRef = useRef<HTMLDivElement>(null);
-	const hasJoined = useRef(false);
-
-	useEffect(() => {
-		setMessages(initialMessages);
-	}, [initialMessages]);
-
-	useEffect(() => {
-		messagesEndRef.current?.scrollIntoView({
-			behavior: "smooth",
-			block: "end",
-		});
-	}, [messages, streamingMessage, isAiTyping]);
-
-	useEffect(() => {
-		if (!id || !data) return;
-
-		const token = getAccessToken();
-		if (!token) return;
-
-		const ws = new WebSocket(WS_URL);
-		wsRef.current = ws;
-
-		ws.onopen = () => {
-			setIsConnected(true);
-			ws.send(
-				JSON.stringify({
-					type: "join",
-					payload: { token, conversationId: id },
-				}),
-			);
-			hasJoined.current = true;
-		};
-
-		ws.onmessage = (event) => {
-			const msg = JSON.parse(event.data);
-
-			switch (msg.type) {
-				case "message_saved": {
-					setMessages((prev) => [
-						...prev,
-						{
-							id: msg.payload.id,
-							sender: msg.payload.sender,
-							senderName: msg.payload.senderName,
-							message: msg.payload.message,
-							timestamp: formatTime(msg.payload.timestamp),
-						},
-					]);
-					break;
-				}
-				case "ai_typing": {
-					setIsAiTyping(true);
-					break;
-				}
-				case "ai_stream_start": {
-					setIsAiTyping(false);
-					setStreamingMessage("");
-					break;
-				}
-				case "ai_stream_chunk": {
-					setStreamingMessage(msg.payload.full);
-					break;
-				}
-				case "ai_stream_end": {
-					setStreamingMessage(null);
-					setMessages((prev) => [
-						...prev,
-						{
-							id: msg.payload.id,
-							sender: msg.payload.sender,
-							senderName: msg.payload.senderName,
-							message: msg.payload.message,
-							timestamp: formatTime(msg.payload.timestamp),
-						},
-					]);
-					break;
-				}
-				case "error": {
-					console.error("WebSocket error:", msg.payload.message);
-					break;
-				}
-			}
-		};
-
-		ws.onclose = () => {
-			setIsConnected(false);
-			hasJoined.current = false;
-		};
-
-		return () => {
-			ws.close();
-			wsRef.current = null;
-		};
-	}, [id, data]);
-
-	const handleSend = useCallback(() => {
-		if (
-			!inputValue.trim() ||
-			!wsRef.current ||
-			wsRef.current.readyState !== WebSocket.OPEN
-		)
-			return;
-
-		wsRef.current.send(
-			JSON.stringify({
-				type: "send_message",
-				payload: { message: inputValue.trim() },
-			}),
-		);
-		setInputValue("");
-	}, [inputValue]);
 
 	if (isLoading) {
 		return (
@@ -247,63 +116,72 @@ export default function ConversationPage() {
 	}
 
 	if (error) {
-		throw error;
+		const message =
+			error.status === 410
+				? "This access code has expired. Access codes are valid for 30 days."
+				: error.status === 404
+					? "Invalid access code. Please check and try again."
+					: "Something went wrong while loading the conversation.";
+
+		return (
+			<div className="flex min-h-screen flex-col bg-brand-brown">
+				<Nav
+					actions={[{ label: "Help", href: "/help", variant: "outlined" }]}
+				/>
+				<div className="flex flex-1 items-center justify-center px-4">
+					<div className="w-full max-w-md rounded-2xl bg-white p-8 text-center">
+						<span className="text-5xl" aria-hidden="true">
+							{error.status === 410 ? "⏱️" : "🔍"}
+						</span>
+						<h1 className="mt-4 font-display text-2xl font-bold text-brand-brown">
+							{error.status === 410 ? "Code Expired" : "Conversation Not Found"}
+						</h1>
+						<p className="mt-3 text-sm text-brand-brown/60">{message}</p>
+						<div className="mt-6 flex flex-col gap-3">
+							<Link
+								href="/resume"
+								className="inline-flex h-12 items-center justify-center rounded-full bg-brand-brown px-8 text-sm font-bold uppercase tracking-wider text-white transition-colors hover:bg-brand-brown/90"
+							>
+								Try Another Code
+							</Link>
+							<Link
+								href="/"
+								className="inline-flex h-12 items-center justify-center rounded-full border-2 border-brand-brown px-8 text-sm font-bold uppercase tracking-wider text-brand-brown transition-colors hover:bg-brand-brown/5"
+							>
+								Go Home
+							</Link>
+						</div>
+					</div>
+				</div>
+			</div>
+		);
 	}
 
-	if (!data) {
-		throw new Error("Conversation not found");
-	}
+	if (!data) return null;
 
 	const { profile } = data;
-	const studentName = profile.studentName;
-	const isSendDisabled =
-		!isConnected || isAiTyping || streamingMessage !== null;
 
 	const chatPanel = (
 		<div className="flex h-full flex-col rounded-2xl bg-white min-h-0">
-			<div
-				ref={scrollContainerRef}
-				className="flex-1 space-y-6 overflow-y-auto p-5 md:p-8 min-h-0"
-			>
+			<div className="flex-1 space-y-6 overflow-y-auto p-5 md:p-8 min-h-0">
 				{messages.map((msg) => (
 					<ChatBubble key={msg.id} {...msg} />
 				))}
-
-				{streamingMessage !== null && (
-					<ChatBubble
-						sender="ai"
-						senderName="Genius Guide"
-						message={streamingMessage || "\u00A0"}
-						timestamp={formatTime(new Date())}
-						className="animate-in fade-in"
-					/>
-				)}
-
-				{isAiTyping && <TypingIndicator />}
-
-				<div ref={messagesEndRef} className="h-px w-full" />
 			</div>
 
-			{/* Fixed Input Area */}
-			<div className="shrink-0">
-				<ChatInput
-					value={inputValue}
-					onChange={setInputValue}
-					onSend={handleSend}
-					placeholder={
-						isSendDisabled
-							? "Waiting for response..."
-							: "Type your message here..."
-					}
-				/>
+			{/* Read-only banner */}
+			<div className="shrink-0 border-t border-brand-cream/60 px-4 py-4 text-center">
+				<p className="text-sm text-brand-brown/50">
+					This is a shared, read-only view of this conversation.
+				</p>
 			</div>
 		</div>
 	);
 
 	const profilePanel = (
-		<div className="h-full min-h-0 rounded-2xl bg-white p-5 md:p-8 overflow-y-auto">
+		<div className="h-full rounded-2xl bg-white p-5 md:p-8 overflow-y-auto">
 			<ProfileProgress
-				studentName={studentName}
+				studentName={profile.studentName}
 				percentComplete={profile.percentComplete}
 				sections={profile.sections}
 			/>
@@ -317,7 +195,7 @@ export default function ConversationPage() {
 				actions={[
 					{
 						label: `${profile.percentComplete}% Complete`,
-						href: `/conversation/${id}`,
+						href: `/shared/${code}`,
 						variant: "orange",
 					},
 					{ label: "Help", href: "/help", variant: "outlined" },

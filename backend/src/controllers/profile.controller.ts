@@ -136,3 +136,36 @@ export async function createProfile(
 		});
 	}
 }
+
+export async function deleteProfile(
+	req: AuthRequest,
+	res: Response,
+): Promise<void> {
+	try {
+		const profile = await Profile.findOne({
+			_id: req.params.id,
+			userId: req.userId,
+		});
+
+		if (!profile) {
+			res.status(404).json({
+				success: false,
+				error: "Profile not found",
+			});
+			return;
+		}
+
+		await Conversation.deleteMany({ profileId: profile._id });
+		await Profile.deleteOne({ _id: profile._id });
+
+		res.json({
+			success: true,
+			message: "Profile and associated conversations deleted",
+		});
+	} catch (error) {
+		res.status(500).json({
+			success: false,
+			error: "Failed to delete profile",
+		});
+	}
+}

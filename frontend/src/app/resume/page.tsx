@@ -3,9 +3,11 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Nav } from "@/components/ui/Nav";
+import { useValidateAccessCode } from "@/lib/hooks/useValidateAccessCode";
 
 export default function ResumePage() {
 	const [code, setCode] = useState("");
+	const { validate, isValidating, error } = useValidateAccessCode();
 
 	return (
 		<div className="flex min-h-screen flex-col bg-brand-orange">
@@ -66,7 +68,7 @@ export default function ResumePage() {
 						className="mt-8"
 						onSubmit={(e) => {
 							e.preventDefault();
-							// TODO: handle resume
+							validate(code);
 						}}
 					>
 						<label className="text-sm font-bold text-brand-brown">
@@ -79,30 +81,68 @@ export default function ResumePage() {
 							onChange={(e) => setCode(e.target.value)}
 							maxLength={9}
 							required
-							className="mt-2 h-14 w-full rounded-lg border border-brand-cream bg-white text-center text-xl font-semibold tracking-widest text-brand-brown outline-none transition placeholder:text-brand-brown/30 focus:border-brand-brown/40"
+							disabled={isValidating}
+							className="mt-2 h-14 w-full rounded-lg border border-brand-cream bg-white text-center text-xl font-semibold tracking-widest text-brand-brown outline-none transition placeholder:text-brand-brown/30 focus:border-brand-brown/40 disabled:opacity-50"
 						/>
-						<p className="mt-2 text-sm text-brand-brown/50">
-							Format: XXXX-XXXX (e.g., XK7P-M4N2)
-						</p>
+						{error ? (
+							<p className="mt-2 text-sm font-medium text-red-600">
+								{error}
+							</p>
+						) : (
+							<p className="mt-2 text-sm text-brand-brown/50">
+								Format: XXXX-XXXX (e.g., XK7P-M4N2)
+							</p>
+						)}
 
 						<button
 							type="submit"
-							className="mt-8 inline-flex h-13 w-full items-center justify-center gap-2 rounded-full bg-brand-brown text-base font-bold uppercase tracking-wider text-white transition-colors hover:bg-brand-brown/90"
+							disabled={isValidating}
+							className="mt-8 inline-flex h-13 w-full items-center justify-center gap-2 rounded-full bg-brand-brown text-base font-bold uppercase tracking-wider text-white transition-colors hover:bg-brand-brown/90 disabled:opacity-60"
 						>
-							Continue Conversation
-							<svg
-								width="16"
-								height="16"
-								viewBox="0 0 16 16"
-								fill="none"
-								stroke="currentColor"
-								strokeWidth="2"
-								strokeLinecap="round"
-								strokeLinejoin="round"
-								aria-hidden="true"
-							>
-								<path d="M3 8h10M9 4l4 4-4 4" />
-							</svg>
+							{isValidating ? (
+								<>
+									<svg
+										className="h-5 w-5 animate-spin"
+										viewBox="0 0 24 24"
+										fill="none"
+										aria-hidden="true"
+									>
+										<circle
+											cx="12"
+											cy="12"
+											r="10"
+											stroke="currentColor"
+											strokeWidth="3"
+											className="opacity-25"
+										/>
+										<path
+											d="M4 12a8 8 0 018-8"
+											stroke="currentColor"
+											strokeWidth="3"
+											strokeLinecap="round"
+											className="opacity-75"
+										/>
+									</svg>
+									Checking...
+								</>
+							) : (
+								<>
+									Continue Conversation
+									<svg
+										width="16"
+										height="16"
+										viewBox="0 0 16 16"
+										fill="none"
+										stroke="currentColor"
+										strokeWidth="2"
+										strokeLinecap="round"
+										strokeLinejoin="round"
+										aria-hidden="true"
+									>
+										<path d="M3 8h10M9 4l4 4-4 4" />
+									</svg>
+								</>
+							)}
 						</button>
 					</form>
 
