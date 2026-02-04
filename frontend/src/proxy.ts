@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 
-const protectedRoutes = ["/dashboard", "/conversation", "/complete", "/start"];
+const protectedRoutes = ["/dashboard", "/conversation", "/profile", "/start"];
 const authRoutes = ["/login", "/signup"];
 
 function isProtectedRoute(pathname: string): boolean {
@@ -69,7 +69,7 @@ export const config = {
 	matcher: [
 		"/dashboard/:path*",
 		"/conversation/:path*",
-		"/complete/:path*",
+		"/profile/:path*",
 		"/login",
 		"/signup",
 		"/start",

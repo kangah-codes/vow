@@ -156,7 +156,7 @@ function ProfileCardComponent({
 				{isComplete ? (
 					<>
 						<Link
-							href={`/profile/${profile._id}`}
+							href={`/profile/${profile.conversationId}`}
 							className="inline-flex h-9 items-center justify-center rounded-full bg-brand-brown px-4 text-xs font-bold uppercase tracking-wider text-white transition-colors hover:bg-brand-brown/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
 						>
 							View
@@ -177,7 +177,7 @@ function ProfileCardComponent({
 				) : (
 					<>
 						<Link
-							href={`/conversation/${profile.conversationId || profile._id}`}
+							href={`/conversation/${profile.conversationId}`}
 							className="inline-flex h-9 items-center justify-center rounded-full bg-brand-brown px-4 text-xs font-bold uppercase tracking-wider text-white transition-colors hover:bg-brand-brown/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
 						>
 							Continue
@@ -415,7 +415,7 @@ export default function DashboardPage() {
 				greeting={user ? `Welcome, ${user.firstName}` : undefined}
 				actions={[
 					{ label: "Help", href: "/help", variant: "filled" },
-					{ label: "Logout", onClick: () => logout(), variant: "filled" },
+					{ label: "Logout", onClick: () => logout(), variant: "outlined" },
 				]}
 			/>
 

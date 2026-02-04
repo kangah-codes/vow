@@ -3,7 +3,14 @@ import { IncomingMessage } from "http";
 import jwt from "jsonwebtoken";
 import { env } from "../config/env";
 import { Conversation } from "../models/conversation.model";
+import { Profile } from "../models/profile.model";
 import { logger } from "../utils/logger";
+import {
+	streamAIResponse,
+	parseAIResponse,
+	updateProfileProgress,
+	getNextSection,
+} from "../services/conversation.service";
 
 interface ChatMessage {
 	type: "join" | "send_message" | "ping";
@@ -12,24 +19,6 @@ interface ChatMessage {
 		message?: string;
 		token?: string;
 	};
-}
-
-const MOCK_RESPONSES = [
-	"That's a really insightful observation. Can you tell me more about how that shows up in their daily life?",
-	"I love hearing that! It sounds like they have a strong sense of curiosity. How do they react when encountering something new or unfamiliar?",
-	"That's wonderful. Understanding these qualities helps us build a complete picture. What about in social situations — how do they interact with peers from different backgrounds?",
-	"Thank you for sharing that. It tells me a lot about their character. Can you think of a specific moment that really demonstrated this quality?",
-	"That's a great example. Let's explore another dimension — how does the student handle challenges or setbacks? Do they tend to persevere or need encouragement?",
-	"Interesting! Resilience is such an important trait. Now, thinking about trust — are there particular adults or mentors outside the family that the student looks up to?",
-	"I appreciate you sharing all of this. It's helping me understand the student on a deeper level. Let's talk about fairness — has the student ever spoken up about something they felt was unfair?",
-];
-
-function getRandomDelay(): number {
-	return Math.floor(Math.random() * 2000) + 4000;
-}
-
-function getRandomResponse(): string {
-	return MOCK_RESPONSES[Math.floor(Math.random() * MOCK_RESPONSES.length)];
 }
 
 function verifyToken(token: string): string | null {
@@ -143,6 +132,41 @@ export function handleWebSocketConnection(
 					const conversation = await Conversation.findById(conversationId);
 					if (!conversation) return;
 
+					const profile = await Profile.findById(conversation.profileId);
+					if (!profile) return;
+
+					if (profile.status === "complete") {
+						ws.send(
+							JSON.stringify({
+								type: "error",
+								payload: {
+									message:
+										"This profile is already complete. No further messages can be sent.",
+								},
+							}),
+						);
+						return;
+					}
+
+					// Capture current section ONCE before any mutations
+					const activeSection =
+						conversation.currentSection || "Interest Awareness";
+
+					logger.info(`[SECTION DEBUG] conversation.currentSection from DB: "${conversation.currentSection}"`);
+					logger.info(`[SECTION DEBUG] activeSection resolved to: "${activeSection}"`);
+					logger.info(`[SECTION DEBUG] profile sections: ${JSON.stringify(profile.sections.map(s => ({ title: s.title, status: s.status })))}`);
+
+					// Mark section as in-progress if it's not started yet
+					const sectionData = profile.sections.find(
+						(s) => s.title === activeSection,
+					);
+					if (sectionData && sectionData.status === "not-started") {
+						logger.info(`[SECTION DEBUG] marking "${activeSection}" as in-progress (was not-started)`);
+						sectionData.status = "in-progress";
+						await profile.save();
+					}
+
+					// Save user message (only push to messages, don't re-save currentSection)
 					const userMsg = {
 						sender: "user" as const,
 						senderName: "You",
@@ -168,47 +192,73 @@ export function handleWebSocketConnection(
 						}),
 					);
 
-					const delay = getRandomDelay();
+					// Start AI response
 					ws.send(JSON.stringify({ type: "ai_typing" }));
 
-					setTimeout(async () => {
-						if (ws.readyState !== WebSocket.OPEN) return;
-
-						const fullResponse = getRandomResponse();
-						const words = fullResponse.split(" ");
+					try {
+						const { stream, getFullResponse } = await streamAIResponse(
+							profile,
+							conversation,
+							userMessage.trim(),
+						);
 
 						ws.send(JSON.stringify({ type: "ai_stream_start" }));
 
-						let streamed = "";
-						for (let i = 0; i < words.length; i++) {
+						// Stream chunks to client
+						let streamedMessage = "";
+						for await (const chunk of stream) {
 							if (ws.readyState !== WebSocket.OPEN) return;
+							streamedMessage += chunk;
 
-							streamed += (i > 0 ? " " : "") + words[i];
-							ws.send(
-								JSON.stringify({
-									type: "ai_stream_chunk",
-									payload: { word: words[i], full: streamed },
-								}),
-							);
-
-							await new Promise((r) =>
-								setTimeout(r, Math.floor(Math.random() * 50) + 30),
-							);
+							// Try to extract the message field progressively for display
+							const displayText = extractMessageField(streamedMessage);
+							if (displayText) {
+								ws.send(
+									JSON.stringify({
+										type: "ai_stream_chunk",
+										payload: { chunk, full: displayText },
+									}),
+								);
+							}
 						}
 
-						const conv = await Conversation.findById(conversationId);
-						if (!conv) return;
+						if (ws.readyState !== WebSocket.OPEN) return;
 
-						const aiMsg = {
-							sender: "ai" as const,
-							senderName: "Genius Guide",
-							message: fullResponse,
-							timestamp: new Date(),
-						};
-						conv.messages.push(aiMsg);
-						await conv.save();
+						// Parse the complete response
+						const fullResponse = getFullResponse();
+						logger.info(`[SECTION DEBUG] raw AI response (first 300 chars): ${fullResponse.substring(0, 300)}`);
 
-						const savedAiMsg = conv.messages[conv.messages.length - 1];
+						const aiResponse = parseAIResponse(fullResponse);
+						logger.info(`[SECTION DEBUG] parsed AI response: sectionComplete=${aiResponse.sectionComplete}, sectionContent=${aiResponse.sectionContent ? aiResponse.sectionContent.substring(0, 100) + "..." : "null"}`);
+
+						// Save AI message and advance section atomically
+						let nextSection: string | null = null;
+						if (aiResponse.sectionComplete) {
+							nextSection = getNextSection(activeSection);
+							logger.info(`[SECTION DEBUG] section "${activeSection}" marked complete, advancing to: "${nextSection}"`);
+						}
+
+						await Conversation.findByIdAndUpdate(conversationId, {
+							$push: {
+								messages: {
+									sender: "ai",
+									senderName: "Genius Guide",
+									message: aiResponse.message,
+									timestamp: new Date(),
+								},
+							},
+							...(nextSection
+								? { $set: { currentSection: nextSection } }
+								: {}),
+						});
+
+						// Re-fetch to get the saved message with its _id
+						const updatedConv =
+							await Conversation.findById(conversationId);
+						if (!updatedConv) return;
+
+						const savedAiMsg =
+							updatedConv.messages[updatedConv.messages.length - 1];
 
 						ws.send(
 							JSON.stringify({
@@ -222,7 +272,42 @@ export function handleWebSocketConnection(
 								},
 							}),
 						);
-					}, delay);
+
+						// Update profile progress using the captured activeSection
+						if (aiResponse.sectionComplete) {
+							const updatedProfile = await updateProfileProgress(
+								profile._id.toString(),
+								activeSection,
+								aiResponse,
+							);
+
+							if (updatedProfile) {
+								ws.send(
+									JSON.stringify({
+										type: "section_complete",
+										payload: {
+											sections: updatedProfile.sections,
+											percentComplete: updatedProfile.percentComplete,
+											status: updatedProfile.status,
+											currentSection:
+												nextSection || activeSection,
+										},
+									}),
+								);
+							}
+						}
+					} catch (aiError) {
+						logger.error("AI response error:", aiError);
+						ws.send(
+							JSON.stringify({
+								type: "error",
+								payload: {
+									message:
+										"I'm having trouble responding right now. Please try again.",
+								},
+							}),
+						);
+					}
 
 					break;
 				}
@@ -248,4 +333,49 @@ export function handleWebSocketConnection(
 	ws.on("error", (error) => {
 		logger.error("WebSocket error:", error);
 	});
+}
+
+/**
+ * Progressively extract the "message" field from a partial JSON stream.
+ * Returns the extracted text so far, or null if we can't parse yet.
+ */
+function extractMessageField(partial: string): string | null {
+	// Look for "message": " pattern and extract content after it
+	const messageStart = partial.indexOf('"message"');
+	if (messageStart === -1) return null;
+
+	// Find the opening quote of the value
+	const colonIndex = partial.indexOf(":", messageStart + 9);
+	if (colonIndex === -1) return null;
+
+	// Find the start of the string value
+	const valueStart = partial.indexOf('"', colonIndex + 1);
+	if (valueStart === -1) return null;
+
+	// Extract everything after the opening quote, handling escape sequences
+	let result = "";
+	let i = valueStart + 1;
+	while (i < partial.length) {
+		if (partial[i] === "\\") {
+			if (i + 1 < partial.length) {
+				const next = partial[i + 1];
+				if (next === '"') result += '"';
+				else if (next === "n") result += "\n";
+				else if (next === "\\") result += "\\";
+				else if (next === "t") result += "\t";
+				else result += next;
+				i += 2;
+				continue;
+			}
+			break;
+		}
+		if (partial[i] === '"') {
+			// End of string value
+			break;
+		}
+		result += partial[i];
+		i++;
+	}
+
+	return result || null;
 }

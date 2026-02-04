@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import * as Tabs from "@radix-ui/react-tabs";
 import { Nav } from "@/components/ui/Nav";
 import {
@@ -10,7 +10,10 @@ import {
 	ChatSkeleton,
 	TypingIndicator,
 } from "@/components/ui/Chat";
-import { ProfileProgress } from "@/components/ui/ProfileProgress";
+import {
+	ProfileProgress,
+	type ProfileSectionData,
+} from "@/components/ui/ProfileProgress";
 import { useConversation } from "@/lib/hooks/useConversation";
 
 const WS_URL = "ws://localhost:3001";
@@ -36,6 +39,7 @@ function getAccessToken(): string | undefined {
 
 export default function ConversationPage() {
 	const params = useParams();
+	const router = useRouter();
 	const id = params.id as string;
 	const { data, isLoading, error } = useConversation(id);
 
@@ -55,9 +59,28 @@ export default function ConversationPage() {
 	const [isAiTyping, setIsAiTyping] = useState(false);
 	const [streamingMessage, setStreamingMessage] = useState<string | null>(null);
 	const [isConnected, setIsConnected] = useState(false);
+	const [profileState, setProfileState] = useState<{
+		percentComplete: number;
+		sections: ProfileSectionData[];
+		status: string;
+	} | null>(null);
 
 	const wsRef = useRef<WebSocket | null>(null);
 	const hasJoined = useRef(false);
+
+	// Redirect to profile page if already complete
+	useEffect(() => {
+		if (data && data.profile.status === "complete") {
+			router.replace(`/profile/${id}`);
+		}
+	}, [data, id, router]);
+
+	// Redirect to profile page when profile completes during chat
+	useEffect(() => {
+		if (profileState?.status === "complete") {
+			router.push(`/profile/${id}`);
+		}
+	}, [profileState?.status, id, router]);
 
 	useEffect(() => {
 		setMessages(initialMessages);
@@ -139,6 +162,14 @@ export default function ConversationPage() {
 							timestamp: formatTime(msg.payload.timestamp),
 						},
 					]);
+					break;
+				}
+				case "section_complete": {
+					setProfileState({
+						percentComplete: msg.payload.percentComplete,
+						sections: msg.payload.sections,
+						status: msg.payload.status,
+					});
 					break;
 				}
 				case "error": {
@@ -261,8 +292,12 @@ export default function ConversationPage() {
 
 	const { profile } = data;
 	const studentName = profile.studentName;
+	const currentPercent = profileState?.percentComplete ?? profile.percentComplete;
+	const currentSections = profileState?.sections ?? profile.sections;
+	const currentStatus = profileState?.status ?? profile.status;
+	const isProfileComplete = currentStatus === "complete";
 	const isSendDisabled =
-		!isConnected || isAiTyping || streamingMessage !== null;
+		!isConnected || isAiTyping || streamingMessage !== null || isProfileComplete;
 
 	const chatPanel = (
 		<div className="flex h-full flex-col rounded-2xl bg-white min-h-0">
@@ -295,10 +330,13 @@ export default function ConversationPage() {
 					value={inputValue}
 					onChange={setInputValue}
 					onSend={handleSend}
+					disabled={isSendDisabled}
 					placeholder={
-						isSendDisabled
-							? "Waiting for response..."
-							: "Type your message here..."
+						isProfileComplete
+							? "This profile is complete"
+							: isSendDisabled
+								? "Waiting for response..."
+								: "Type your message here..."
 					}
 				/>
 			</div>
@@ -309,8 +347,8 @@ export default function ConversationPage() {
 		<div className="h-full min-h-0 rounded-2xl bg-white p-5 md:p-8 overflow-y-auto">
 			<ProfileProgress
 				studentName={studentName}
-				percentComplete={profile.percentComplete}
-				sections={profile.sections}
+				percentComplete={currentPercent}
+				sections={currentSections}
 			/>
 		</div>
 	);
@@ -321,7 +359,7 @@ export default function ConversationPage() {
 				className="relative z-20 shrink-0"
 				actions={[
 					{
-						label: `${profile.percentComplete}% Complete`,
+						label: `${currentPercent}% Complete`,
 						href: `/conversation/${id}`,
 						variant: "orange",
 					},

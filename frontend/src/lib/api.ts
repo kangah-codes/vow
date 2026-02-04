@@ -46,7 +46,6 @@ export async function apiFetch<T>(
 			const protectedRoutes = [
 				"/dashboard",
 				"/conversation",
-				"/complete",
 				"/profile",
 				"/start",
 			];
