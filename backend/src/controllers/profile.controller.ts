@@ -22,7 +22,7 @@ async function sendAccessCodeEmail(
 	console.log("──────────────────────────────────────");
 	console.log("📧 MOCK EMAIL SENT");
 	console.log(`To: ${email}`);
-	console.log(`Subject: Your Genius Profile Access Code`);
+	console.log(`Subject: Your Genius Summary Access Code`);
 	console.log(`Body:`);
 	console.log(`  Hi! Your access code for ${studentName}'s profile is:`);
 	console.log(`  ${accessCode}`);
@@ -39,9 +39,21 @@ export async function getProfiles(
 			.select("-__v")
 			.sort({ updatedAt: -1 });
 
+		const profilesWithConversations = await Promise.all(
+			profiles.map(async (profile) => {
+				const conversation = await Conversation.findOne({
+					profileId: profile._id,
+				}).select("_id");
+				return {
+					...profile.toObject(),
+					conversationId: conversation?._id,
+				};
+			}),
+		);
+
 		res.json({
 			success: true,
-			data: profiles,
+			data: profilesWithConversations,
 		});
 	} catch (error) {
 		res.status(500).json({
@@ -97,7 +109,7 @@ export async function createProfile(
 				{
 					sender: "ai",
 					senderName: "Genius Guide",
-					message: `Welcome! I'm here to help build ${value.studentName}'s Genius Profile. Let's start by exploring their interests. What activities or subjects does ${value.studentName} enjoy the most?`,
+					message: `Welcome! I'm here to help build ${value.studentName}'s Genius Summary. Let's start by exploring their interests. What activities or subjects does ${value.studentName} enjoy the most?`,
 					timestamp: new Date(),
 				},
 			],

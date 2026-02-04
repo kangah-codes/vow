@@ -16,9 +16,9 @@ const FAQ_DATA: FaqCategory[] = [
 		title: "Getting Started",
 		items: [
 			{
-				question: "What is My Genius Profile?",
+				question: "What is My Genius Summary?",
 				answer:
-					"My Genius Profile is a tool designed to help parents and educators discover and celebrate the unique strengths and talents of their children. Through guided conversations, we build a comprehensive profile that highlights your child's genius across multiple dimensions.",
+					"My Genius Summary is a tool designed to help parents and educators discover and celebrate the unique strengths and talents of their children. Through guided conversations, we build a comprehensive profile that highlights your child's genius across multiple dimensions.",
 			},
 			{
 				question: "How long does it take to complete a profile?",
@@ -217,7 +217,7 @@ export default function HelpPage() {
 						Help &amp; Support
 					</h1>
 					<p className="mt-3 text-base text-brand-brown/60">
-						Find answers to common questions about My Genius Profile
+						Find answers to common questions about My Genius Summary
 					</p>
 				</div>
 

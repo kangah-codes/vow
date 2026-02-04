@@ -165,7 +165,7 @@ function ProfileCardComponent({ profile }: { profile: Profile }) {
 				) : (
 					<>
 						<Link
-							href={`/conversation/${profile._id}`}
+							href={`/conversation/${profile.conversationId || profile._id}`}
 							className="inline-flex h-9 items-center justify-center rounded-full bg-brand-brown px-4 text-xs font-bold uppercase tracking-wider text-white transition-colors hover:bg-brand-brown/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
 						>
 							Continue

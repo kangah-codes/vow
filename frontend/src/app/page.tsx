@@ -64,7 +64,7 @@ export default function Home() {
 				{/* Hero content */}
 				<div className="relative z-10 mx-auto max-w-7xl text-center">
 					<h1 className="font-display text-4xl font-bold leading-tight text-white md:text-7xl md:leading-none">
-						Welcome to My Genius Profile
+						Welcome to My Genius Summary
 					</h1>
 					<p className="mx-auto mt-4 max-w-lg text-lg text-white/80 md:mt-6 md:text-xl">
 						Discover and celebrate your child&apos;s unique genius

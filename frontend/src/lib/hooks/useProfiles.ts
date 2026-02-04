@@ -21,6 +21,7 @@ export interface Profile {
 	status: "in-progress" | "complete";
 	sections: ProfileSection[];
 	teacherEmail?: string;
+	conversationId?: string;
 	createdAt: string;
 	updatedAt: string;
 }

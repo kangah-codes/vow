@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useParams } from "next/navigation";
 import * as Tabs from "@radix-ui/react-tabs";
 import { Nav } from "@/components/ui/Nav";
@@ -34,37 +34,40 @@ export default function ConversationPage() {
 	const id = params.id as string;
 	const { data, isLoading, error } = useConversation(id);
 
-	const [messages, setMessages] = useState<ChatMsg[]>([]);
+	const initialMessages = useMemo(() => {
+		if (!data?.conversation.messages) return [];
+		return data.conversation.messages.map((m) => ({
+			id: m._id,
+			sender: m.sender,
+			senderName: m.senderName,
+			message: m.message,
+			timestamp: formatTime(m.timestamp),
+		}));
+	}, [data?.conversation.messages]);
+
+	const [messages, setMessages] = useState<ChatMsg[]>(initialMessages);
 	const [inputValue, setInputValue] = useState("");
 	const [isAiTyping, setIsAiTyping] = useState(false);
-	const [streamingMessage, setStreamingMessage] = useState<string | null>(
-		null,
-	);
+	const [streamingMessage, setStreamingMessage] = useState<string | null>(null);
 	const [isConnected, setIsConnected] = useState(false);
 
 	const wsRef = useRef<WebSocket | null>(null);
 	const messagesEndRef = useRef<HTMLDivElement>(null);
+	const scrollContainerRef = useRef<HTMLDivElement>(null);
 	const hasJoined = useRef(false);
 
-	// Populate messages from API data
+	// Update messages when initial messages change
 	useEffect(() => {
-		if (data?.conversation.messages) {
-			setMessages(
-				data.conversation.messages.map((m) => ({
-					id: m._id,
-					sender: m.sender,
-					senderName: m.senderName,
-					message: m.message,
-					timestamp: formatTime(m.timestamp),
-				})),
-			);
-		}
-	}, [data]);
+		setMessages(initialMessages);
+	}, [initialMessages]);
 
 	// Auto-scroll to bottom
 	useEffect(() => {
-		messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-	}, [messages, isAiTyping, streamingMessage]);
+		messagesEndRef.current?.scrollIntoView({
+			behavior: "smooth",
+			block: "end",
+		});
+	}, [messages, streamingMessage, isAiTyping]);
 
 	// WebSocket connection
 	useEffect(() => {
@@ -188,11 +191,17 @@ export default function ConversationPage() {
 
 	const { profile } = data;
 	const studentName = profile.studentName;
-	const isSendDisabled = !isConnected || isAiTyping || streamingMessage !== null;
+	const isSendDisabled =
+		!isConnected || isAiTyping || streamingMessage !== null;
 
+	// --- FIXED CHAT PANEL ---
 	const chatPanel = (
-		<div className="flex h-full flex-col rounded-2xl bg-white">
-			<div className="flex-1 space-y-6 overflow-y-auto p-5 md:p-8">
+		<div className="flex h-full flex-col rounded-2xl bg-white min-h-0">
+			{/* Scrollable Area */}
+			<div
+				ref={scrollContainerRef}
+				className="flex-1 space-y-6 overflow-y-auto p-5 md:p-8 min-h-0"
+			>
 				{messages.map((msg) => (
 					<ChatBubble key={msg.id} {...msg} />
 				))}
@@ -209,23 +218,28 @@ export default function ConversationPage() {
 
 				{isAiTyping && <TypingIndicator />}
 
-				<div ref={messagesEndRef} />
+				<div ref={messagesEndRef} className="h-px w-full" />
 			</div>
-			<ChatInput
-				value={inputValue}
-				onChange={setInputValue}
-				onSend={handleSend}
-				placeholder={
-					isSendDisabled
-						? "Waiting for response..."
-						: "Type your message here..."
-				}
-			/>
+
+			{/* Fixed Input Area */}
+			<div className="shrink-0">
+				<ChatInput
+					value={inputValue}
+					onChange={setInputValue}
+					onSend={handleSend}
+					placeholder={
+						isSendDisabled
+							? "Waiting for response..."
+							: "Type your message here..."
+					}
+				/>
+			</div>
 		</div>
 	);
 
+	// --- FIXED PROFILE PANEL ---
 	const profilePanel = (
-		<div className="rounded-2xl bg-white p-5 md:p-8">
+		<div className="h-full rounded-2xl bg-white p-5 md:p-8 overflow-y-auto">
 			<ProfileProgress
 				studentName={studentName}
 				percentComplete={profile.percentComplete}
@@ -235,12 +249,13 @@ export default function ConversationPage() {
 	);
 
 	return (
-		<div className="relative flex min-h-screen flex-col bg-brand-brown isolate">
+		/* FIXED: Changed min-h-screen to h-screen and added overflow-hidden */
+		<div className="relative flex h-screen flex-col bg-brand-brown isolate overflow-hidden">
 			<Nav
-				className="relative z-20"
+				className="relative z-20 shrink-0"
 				actions={[
 					{
-						label: `${studentName}'s Genius Profile ${profile.percentComplete}% Complete`,
+						label: `${studentName}'s Genius Summary ${profile.percentComplete}% Complete`,
 						href: `/conversation/${id}`,
 						variant: "orange",
 					},
@@ -286,17 +301,17 @@ export default function ConversationPage() {
 			</div>
 
 			{/* Desktop: side-by-side panels */}
-			<div className="relative z-10 hidden flex-1 gap-5 p-5 md:flex lg:gap-6 lg:p-6">
-				<div className="flex w-3/5 flex-col">{chatPanel}</div>
-				<div className="w-2/5 overflow-y-auto">{profilePanel}</div>
+			<div className="relative z-10 hidden flex-1 gap-5 p-5 md:flex lg:gap-6 lg:p-6 min-h-0">
+				<div className="flex w-3/5 flex-col h-full">{chatPanel}</div>
+				<div className="w-2/5 h-full">{profilePanel}</div>
 			</div>
 
 			{/* Mobile: Radix Tabs */}
 			<Tabs.Root
 				defaultValue="chat"
-				className="relative z-10 flex flex-1 flex-col md:hidden"
+				className="relative z-10 flex flex-1 flex-col md:hidden min-h-0"
 			>
-				<Tabs.List className="flex bg-white">
+				<Tabs.List className="flex bg-white shrink-0">
 					<Tabs.Trigger
 						value="chat"
 						className="flex-1 border-b-2 border-transparent py-3 text-center text-sm font-semibold uppercase tracking-wider text-brand-brown transition-colors data-[state=active]:border-green-600 data-[state=active]:text-green-600"
@@ -311,10 +326,16 @@ export default function ConversationPage() {
 					</Tabs.Trigger>
 				</Tabs.List>
 
-				<Tabs.Content value="chat" className="flex flex-1 flex-col p-4">
+				<Tabs.Content
+					value="chat"
+					className="flex flex-1 flex-col p-4 overflow-hidden min-h-0"
+				>
 					{chatPanel}
 				</Tabs.Content>
-				<Tabs.Content value="profile" className="flex-1 p-4">
+				<Tabs.Content
+					value="profile"
+					className="flex-1 p-4 overflow-hidden min-h-0"
+				>
 					{profilePanel}
 				</Tabs.Content>
 			</Tabs.Root>

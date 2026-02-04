@@ -170,7 +170,7 @@ export default function CompletePage() {
 							Profile Complete!
 						</h1>
 						<p className="mt-2 text-base text-brand-brown/60">
-							Sarah&apos;s Genius Profile is ready to share
+							Sarah&apos;s Genius Summary is ready to share
 						</p>
 					</div>
 

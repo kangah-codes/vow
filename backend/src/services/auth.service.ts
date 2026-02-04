@@ -10,13 +10,13 @@ export async function hashPassword(password: string): Promise<string> {
 
 export async function comparePassword(
 	password: string,
-	hash: string
+	hash: string,
 ): Promise<boolean> {
 	return bcrypt.compare(password, hash);
 }
 
 export function generateAccessToken(userId: string): string {
-	return jwt.sign({ userId }, env.JWT_SECRET, { expiresIn: "15m" });
+	return jwt.sign({ userId }, env.JWT_SECRET, { expiresIn: "45m" });
 }
 
 export function generateRefreshToken(userId: string): string {

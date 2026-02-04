@@ -53,7 +53,7 @@ function LogoBrand({ dark = false }: { dark?: boolean }) {
 					dark ? "text-white" : "text-brand-brown",
 				)}
 			>
-				My Genius Profile
+				My Genius Summary
 			</span>
 		</div>
 	);

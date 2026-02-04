@@ -10,7 +10,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-	title: "My Genius Profile",
+	title: "My Genius Summary",
 	description: "Discover and celebrate your child's unique genius",
 };
 

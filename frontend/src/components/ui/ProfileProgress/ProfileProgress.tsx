@@ -97,7 +97,7 @@ export function ProfileProgress({
 			{!hideHeader && (
 				<>
 					<h2 className="font-display text-2xl font-bold text-brand-brown md:text-3xl">
-						{studentName}&apos;s Genius Profile
+						{studentName}&apos;s Genius Summary
 					</h2>
 
 					{/* Progress bar */}

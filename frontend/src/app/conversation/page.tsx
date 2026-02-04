@@ -14,7 +14,7 @@ const MOCK_MESSAGES = [
 		sender: "ai" as const,
 		senderName: "AI Assistant",
 		message:
-			"Hello! I'm excited to help you create Sarah's Genius Profile. Let's start by talking about her interests. What activities does Sarah enjoy in her free time?",
+			"Hello! I'm excited to help you create Sarah's Genius Summary. Let's start by talking about her interests. What activities does Sarah enjoy in her free time?",
 		timestamp: "10:30 AM",
 	},
 	{
@@ -90,7 +90,7 @@ export default function ConversationPage() {
 				className="relative z-20"
 				actions={[
 					{
-						label: "Sarah's Genius Profile 42% Complete",
+						label: "Sarah's Genius Summary 42% Complete",
 						href: "/conversation",
 						variant: "orange",
 					},

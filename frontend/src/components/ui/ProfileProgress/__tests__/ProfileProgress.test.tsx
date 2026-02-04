@@ -29,7 +29,7 @@ describe("ProfileProgress", () => {
 			/>,
 		);
 		expect(
-			screen.getByRole("heading", { name: "Alice's Genius Profile" }),
+			screen.getByRole("heading", { name: "Alice's Genius Summary" }),
 		).toBeInTheDocument();
 	});
 
@@ -88,7 +88,7 @@ describe("ProfileProgress", () => {
 				className="custom-class"
 			/>,
 		);
-		expect(screen.getByText("Eve's Genius Profile").parentElement).toHaveClass(
+		expect(screen.getByText("Eve's Genius Summary").parentElement).toHaveClass(
 			"custom-class",
 		);
 	});
@@ -103,7 +103,7 @@ describe("ProfileProgress", () => {
 			/>,
 		);
 		expect(
-			screen.queryByRole("heading", { name: "Frank's Genius Profile" }),
+			screen.queryByRole("heading", { name: "Frank's Genius Summary" }),
 		).not.toBeInTheDocument();
 		expect(screen.queryByText("40% Complete")).not.toBeInTheDocument();
 	});

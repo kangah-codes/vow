@@ -2,7 +2,7 @@ export function setAuthCookies(
 	accessToken: string,
 	refreshToken: string,
 ): void {
-	document.cookie = `accessToken=${accessToken}; path=/; max-age=${15 * 60}; SameSite=Lax`;
+	document.cookie = `accessToken=${accessToken}; path=/; max-age=${45 * 60}; SameSite=Lax`;
 	document.cookie = `refreshToken=${refreshToken}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Lax`;
 }
 
