@@ -112,3 +112,43 @@ body {
 		display: none;
 	}
 }
+
+/* Print styles: show only the profile summary panel */
+@media print {
+	/* Hide everything by default */
+	body * {
+		visibility: hidden;
+	}
+
+	/* Show the profile summary and all its children */
+	#profile-summary,
+	#profile-summary * {
+		visibility: visible;
+	}
+
+	/* Position the profile summary at the top of the page */
+	#profile-summary {
+		position: fixed;
+		top: 0;
+		left: 0;
+		width: 100%;
+		padding: 2rem;
+		border-radius: 0;
+		background: #fff;
+	}
+
+	/* Remove page background and decorative elements */
+	body {
+		background: #fff !important;
+	}
+
+	nav,
+	svg[preserveAspectRatio] {
+		display: none !important;
+	}
+
+	/* Prevent page breaks inside section cards */
+	#profile-summary div {
+		break-inside: avoid;
+	}
+}

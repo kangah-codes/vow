@@ -14,6 +14,9 @@ export interface IUser extends Document {
 	refreshTokens: string[];
 	resetToken?: string;
 	resetTokenExpiresAt?: Date;
+	emailVerified: boolean;
+	oauthProvider?: string;
+	oauthId?: string;
 	createdAt: Date;
 	updatedAt: Date;
 }
@@ -77,10 +80,21 @@ const userSchema = new Schema<IUser>(
 		resetTokenExpiresAt: {
 			type: Date,
 		},
+		emailVerified: {
+			type: Boolean,
+			default: false,
+		},
+		oauthProvider: {
+			type: String,
+			enum: ["google"],
+		},
+		oauthId: {
+			type: String,
+		},
 	},
 	{
 		timestamps: true,
-	}
+	},
 );
 
 export const User = mongoose.model<IUser>("User", userSchema);

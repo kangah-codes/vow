@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Nav } from "@/components/ui/Nav";
 import { ProfileProgress } from "@/components/ui/ProfileProgress";
 import { useConversation } from "@/lib/hooks/useConversation";
+import { downloadProfilePdf } from "@/lib/downloadProfilePdf";
 
 function DownloadIcon() {
 	return (
@@ -72,6 +73,15 @@ export default function ProfilePage() {
 	const id = params.id as string;
 	const { data, isLoading, error } = useConversation(id);
 	const [teacherEmail, setTeacherEmail] = useState("");
+
+	const handleDownloadPdf = useCallback(async () => {
+		if (!data) return;
+		await downloadProfilePdf(data.profile.studentName, data.profile.sections);
+	}, [data]);
+
+	const handlePrint = useCallback(() => {
+		window.print();
+	}, []);
 
 	useEffect(() => {
 		if (data && data.profile.status !== "complete") {
@@ -188,7 +198,7 @@ export default function ProfilePage() {
 			{/* Content */}
 			<div className="relative z-10 grid flex-1 grid-cols-1 gap-5 p-4 md:grid-cols-[3fr_2fr] md:p-6">
 				{/* Left panel: Profile Complete + Sections */}
-				<div className="rounded-2xl bg-white p-6 md:p-10">
+				<div id="profile-summary" className="rounded-2xl bg-white p-6 md:p-10">
 					<div className="text-center">
 						<span className="text-5xl" aria-hidden="true">
 							🎉
@@ -221,6 +231,7 @@ export default function ProfilePage() {
 						<div className="mt-4 grid grid-cols-3 gap-3">
 							<button
 								type="button"
+								onClick={handleDownloadPdf}
 								className="flex flex-col items-center gap-2 rounded-xl border border-brand-cream/60 p-4 text-brand-brown transition-colors hover:bg-stone-50"
 							>
 								<DownloadIcon />
@@ -235,6 +246,7 @@ export default function ProfilePage() {
 							</button>
 							<button
 								type="button"
+								onClick={handlePrint}
 								className="flex flex-col items-center gap-2 rounded-xl border border-brand-cream/60 p-4 text-brand-brown transition-colors hover:bg-stone-50"
 							>
 								<PrintIcon />

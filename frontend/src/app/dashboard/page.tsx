@@ -9,6 +9,7 @@ import { useProfiles, type Profile } from "@/lib/hooks/useProfiles";
 import { useLogout } from "@/lib/hooks/useLogout";
 import { useDeleteProfile } from "@/lib/hooks/useDeleteProfile";
 import { useFocusGroupPrompt } from "@/lib/hooks/useFocusGroupPrompt";
+import { downloadProfilePdf } from "@/lib/downloadProfilePdf";
 
 /* ── Types ── */
 
@@ -163,6 +164,12 @@ function ProfileCardComponent({
 						</Link>
 						<button
 							type="button"
+							onClick={() =>
+								downloadProfilePdf(
+									profile.studentName,
+									profile.sections,
+								)
+							}
 							className="inline-flex h-9 items-center justify-center rounded-full border border-brand-brown px-4 text-xs font-bold uppercase tracking-wider text-brand-brown transition-colors hover:bg-brand-brown/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
 						>
 							Download
