@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import * as Tabs from "@radix-ui/react-tabs";
+import * as Dialog from "@radix-ui/react-dialog";
 import { Nav } from "@/components/ui/Nav";
 import {
 	ChatBubble,
@@ -64,6 +65,7 @@ export default function ConversationPage() {
 		sections: ProfileSectionData[];
 		status: string;
 	} | null>(null);
+	const [showCompleteModal, setShowCompleteModal] = useState(false);
 
 	const wsRef = useRef<WebSocket | null>(null);
 	const hasJoined = useRef(false);
@@ -75,12 +77,12 @@ export default function ConversationPage() {
 		}
 	}, [data, id, router]);
 
-	// Redirect to profile page when profile completes during chat
+	// Show completion modal when profile completes during chat
 	useEffect(() => {
 		if (profileState?.status === "complete") {
-			router.push(`/profile/${id}`);
+			setShowCompleteModal(true);
 		}
-	}, [profileState?.status, id, router]);
+	}, [profileState?.status]);
 
 	useEffect(() => {
 		setMessages(initialMessages);
@@ -151,17 +153,24 @@ export default function ConversationPage() {
 					break;
 				}
 				case "ai_stream_end": {
-					setStreamingMessage(null);
-					setMessages((prev) => [
-						...prev,
-						{
-							id: msg.payload.id,
-							sender: msg.payload.sender,
-							senderName: msg.payload.senderName,
-							message: msg.payload.message,
-							timestamp: formatTime(msg.payload.timestamp),
-						},
-					]);
+					// Show the final message in the streaming bubble first,
+					// then transition to the permanent message after a paint cycle.
+					// This prevents the message from "just appearing" when
+					// ai_stream_start and ai_stream_end arrive close together.
+					setStreamingMessage(msg.payload.message);
+					setTimeout(() => {
+						setStreamingMessage(null);
+						setMessages((prev) => [
+							...prev,
+							{
+								id: msg.payload.id,
+								sender: msg.payload.sender,
+								senderName: msg.payload.senderName,
+								message: msg.payload.message,
+								timestamp: formatTime(msg.payload.timestamp),
+							},
+						]);
+					}, 60);
 					break;
 				}
 				case "section_complete": {
@@ -447,6 +456,31 @@ export default function ConversationPage() {
 					{profilePanel}
 				</Tabs.Content>
 			</Tabs.Root>
+
+			{/* Profile Complete Modal */}
+			<Dialog.Root open={showCompleteModal} onOpenChange={setShowCompleteModal}>
+				<Dialog.Portal>
+					<Dialog.Overlay className="fixed inset-0 z-50 bg-black/50 data-[state=open]:animate-[dialog-fade-in_200ms_ease-out]" />
+					<Dialog.Content
+						className="fixed left-1/2 top-1/2 z-50 w-[90vw] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-white p-8 shadow-xl text-center data-[state=open]:animate-[dialog-fade-in_200ms_ease-out]"
+						onEscapeKeyDown={(e) => e.preventDefault()}
+						onPointerDownOutside={(e) => e.preventDefault()}
+					>
+						<Dialog.Title className="text-2xl font-bold text-brand-brown">
+							Profile Complete!
+						</Dialog.Title>
+						<Dialog.Description className="mt-3 text-base text-gray-600">
+							{studentName}&apos;s Genius Profile has been generated and is ready to view.
+						</Dialog.Description>
+						<button
+							onClick={() => router.push(`/profile/${id}`)}
+							className="mt-6 w-full rounded-full bg-green-600 px-6 py-3 text-base font-semibold text-white transition-colors hover:bg-green-700"
+						>
+							View Genius Profile
+						</button>
+					</Dialog.Content>
+				</Dialog.Portal>
+			</Dialog.Root>
 		</div>
 	);
 }

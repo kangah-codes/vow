@@ -96,6 +96,9 @@ export function buildSystemPrompt(
 		currentSectionData?.status === "not-started" ||
 		currentSectionData?.status === undefined;
 
+	const isLastSection =
+		SECTION_ORDER.indexOf(currentSection) === SECTION_ORDER.length - 1;
+
 	return `You are the "Genius Guide," a warm, culturally affirming guide helping families articulate their child's unique genius for the Village of Wisdom "My Genius Profile" program.
 
 			You are speaking with a ${profile.relationship} about ${profile.studentName}, a ${profile.gradeLevel === "pre-k" ? "Pre-K" : profile.gradeLevel === "k" ? "Kindergarten" : `Grade ${profile.gradeLevel}`} student.
@@ -122,6 +125,7 @@ export function buildSystemPrompt(
 			- After you feel you have gathered enough rich detail about this element (typically 3-5 exchanges), signal that the section is complete
 			- You MUST have at least 3 back-and-forth exchanges specifically about "${currentSection}" before marking it complete — NEVER mark a section complete on the first or second exchange
 			- When you mark a section complete, your "message" MUST include a natural transition that introduces the next topic and asks the first question about it so the conversation flows smoothly
+			${isLastSection ? `- IMPORTANT: This is the FINAL element. When you mark this section complete, do NOT transition to a new topic. Instead, warmly thank the family for participating and sharing so many wonderful details about ${profile.studentName}. Celebrate the child's genius and let the family know that their Genius Profile has been created. Keep it heartfelt and affirming. Do NOT ask any follow-up questions — this is the closing message.` : ""}
 
 			RESPONSE FORMAT:
 			You MUST respond with valid JSON only. No text outside the JSON.

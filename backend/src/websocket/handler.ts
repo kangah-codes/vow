@@ -206,6 +206,7 @@ export function handleWebSocketConnection(
 
 						// Stream chunks to client
 						let streamedMessage = "";
+						let anyChunksSent = false;
 						for await (const chunk of stream) {
 							if (ws.readyState !== WebSocket.OPEN) return;
 							streamedMessage += chunk;
@@ -213,6 +214,7 @@ export function handleWebSocketConnection(
 							// Try to extract the message field progressively for display
 							const displayText = extractMessageField(streamedMessage);
 							if (displayText) {
+								anyChunksSent = true;
 								ws.send(
 									JSON.stringify({
 										type: "ai_stream_chunk",
@@ -223,6 +225,22 @@ export function handleWebSocketConnection(
 						}
 
 						if (ws.readyState !== WebSocket.OPEN) return;
+
+						// If no chunks were sent (extractMessageField never found content),
+						// send the parsed message as a single chunk so the client sees it
+						if (!anyChunksSent) {
+							const fallbackResponse = parseAIResponse(getFullResponse());
+							if (fallbackResponse.message && ws.readyState === WebSocket.OPEN) {
+								ws.send(
+									JSON.stringify({
+										type: "ai_stream_chunk",
+										payload: { chunk: fallbackResponse.message, full: fallbackResponse.message },
+									}),
+								);
+								// Small delay to ensure the client can render the chunk before stream_end
+								await new Promise((resolve) => setTimeout(resolve, 80));
+							}
+						}
 
 						// Parse the complete response
 						const fullResponse = getFullResponse();
