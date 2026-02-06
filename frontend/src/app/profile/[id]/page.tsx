@@ -12,7 +12,7 @@ import {
 } from "@/components/complete";
 import { ProfileSkeleton } from "@/components/profile";
 import { useConversation } from "@/lib/hooks/useConversation";
-import { downloadProfilePdf } from "@/lib/downloadProfilePdf";
+import { downloadProfilePdf } from "@/lib/utils/downloadProfilePdf";
 
 export default function ProfilePage() {
 	const params = useParams();

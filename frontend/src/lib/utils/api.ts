@@ -1,4 +1,4 @@
-import { getAccessToken } from "@/lib/cookies";
+import { getAccessToken } from "@/lib/utils/cookies";
 
 const API_BASE_URL = "http://localhost:3001/api";
 

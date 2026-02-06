@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/utils";
 
 function BubbleSkeleton({ side }: { side: "left" | "right" }) {
 	const isRight = side === "right";

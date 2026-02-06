@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Nav } from "@/components/ui/Nav";
 import { useLogin } from "@/lib/hooks/useLogin";
-import { setAuthCookies } from "@/lib/cookies";
+import { setAuthCookies } from "@/lib/utils/cookies";
 import { GoogleIcon } from "@/components/icons";
 
 interface LoginFormData {

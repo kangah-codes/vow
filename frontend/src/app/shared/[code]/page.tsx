@@ -10,7 +10,7 @@ import { ConversationSkeleton, type ChatMsg } from "@/components/conversation";
 import { SharedError, ReadOnlyChatPanel } from "@/components/shared";
 import { useSharedConversation } from "@/lib/hooks/useSharedConversation";
 import { useCurrentUser } from "@/lib/hooks/useCurrentUser";
-import { formatTime } from "@/lib/utils";
+import { formatTime } from "@/lib/utils/utils";
 
 export default function SharedConversationPage() {
 	const params = useParams();

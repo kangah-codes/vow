@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Nav } from "@/components/ui/Nav";
 import { useSignup } from "@/lib/hooks/useSignup";
-import { setAuthCookies } from "@/lib/cookies";
+import { setAuthCookies } from "@/lib/utils/cookies";
 
 const roles = ["Parent/Caregiver", "Educator", "Student"] as const;
 type Role = (typeof roles)[number];

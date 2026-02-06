@@ -3,18 +3,17 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Nav } from "@/components/ui/Nav";
+import { useRouter } from "next/navigation";
 
 export default function SessionExpiredPage() {
 	const [accessCode, setAccessCode] = useState("");
+	const router = useRouter();
 
 	return (
 		<div className="flex min-h-screen flex-col bg-white">
-			<Nav
-				actions={[{ label: "Help", href: "/help", variant: "outlined" }]}
-			/>
+			<Nav actions={[{ label: "Help", href: "/help", variant: "outlined" }]} />
 
 			<div className="flex flex-1 flex-col items-center px-4 pt-10 pb-16 md:pt-16">
-				{/* Stopwatch icon */}
 				<span className="text-6xl md:text-7xl" aria-hidden="true">
 					⏱️
 				</span>
@@ -23,11 +22,10 @@ export default function SessionExpiredPage() {
 					Session Expired
 				</h1>
 				<p className="mt-3 max-w-md text-center text-base text-brand-brown/60">
-					Your session has timed out due to inactivity. Please log in
-					again to continue.
+					Your session has timed out due to inactivity. Please log in again to
+					continue.
 				</p>
 
-				{/* Buttons */}
 				<div className="mt-8 flex w-full max-w-md flex-col gap-3 sm:flex-row sm:justify-center">
 					<Link
 						href="/login"
@@ -43,19 +41,15 @@ export default function SessionExpiredPage() {
 					</Link>
 				</div>
 
-				{/* Your work is safe */}
 				<div className="mt-10 w-full max-w-md rounded-lg border-l-4 border-brand-blue bg-amber-50 p-5">
-					<h3 className="font-bold text-brand-brown">
-						📌 Your work is safe
-					</h3>
+					<h3 className="font-bold text-brand-brown">📌 Your work is safe</h3>
 					<p className="mt-2 text-sm leading-relaxed text-brand-brown/80">
-						All your conversations and profiles have been saved.
-						After logging in, you&apos;ll be able to access
-						everything right where you left off.
+						All your conversations and profiles have been saved. After logging
+						in, you&apos;ll be able to access everything right where you left
+						off.
 					</p>
 				</div>
 
-				{/* Resume with Access Code */}
 				<div className="mt-10 w-full max-w-md">
 					<h3 className="text-center text-sm font-bold text-brand-brown">
 						Or Resume with Access Code
@@ -70,7 +64,7 @@ export default function SessionExpiredPage() {
 					<button
 						type="button"
 						onClick={() => {
-							// TODO: handle resume
+							router.push(`/shared/${accessCode.replace(/\s/g, "")}`);
 						}}
 						className="mt-4 inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-brand-brown text-sm font-bold uppercase tracking-wider text-white transition-colors hover:bg-brand-brown/90"
 					>

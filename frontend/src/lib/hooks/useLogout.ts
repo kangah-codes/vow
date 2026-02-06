@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { apiFetch, ApiError, setLoggingOut } from "@/lib/api";
-import { clearAuthCookies } from "@/lib/cookies";
+import { apiFetch, ApiError, setLoggingOut } from "@/lib/utils/api";
+import { clearAuthCookies } from "@/lib/utils/cookies";
 
 interface LogoutResponse {
 	success: boolean;

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { apiFetch, ApiError } from "@/lib/api";
+import { apiFetch, ApiError } from "@/lib/utils/api";
 
 interface Message {
 	_id: string;
@@ -45,9 +45,7 @@ export function useConversation(id: string) {
 	return useQuery<ConversationResponse["data"], ApiError>({
 		queryKey: ["conversation", id],
 		queryFn: async () => {
-			const res = await apiFetch<ConversationResponse>(
-				`/conversations/${id}`,
-			);
+			const res = await apiFetch<ConversationResponse>(`/conversations/${id}`);
 			return res.data;
 		},
 		enabled: !!id,

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { ApiError } from "@/lib/api";
+import { ApiError } from "@/lib/utils/api";
 import type { ConversationResponse } from "./useConversation";
 
 const API_BASE_URL = "http://localhost:3001/api";

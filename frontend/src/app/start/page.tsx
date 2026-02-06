@@ -60,7 +60,6 @@ export default function StartPage() {
 			/>
 
 			<main className="relative flex flex-1 items-start justify-center overflow-hidden px-6 py-10 md:items-center md:py-16">
-				{/* Decorative red swooshes on dark bg */}
 				<div
 					className="pointer-events-none absolute inset-0"
 					aria-hidden="true"
@@ -97,7 +96,6 @@ export default function StartPage() {
 					</svg>
 				</div>
 
-				{/* Start card */}
 				<div className="relative z-10 w-full max-w-lg rounded-2xl bg-white px-8 py-12 md:px-14 md:py-16">
 					<h1 className="text-center font-display text-3xl font-bold text-brand-brown md:text-4xl">
 						Let&apos;s Get Started

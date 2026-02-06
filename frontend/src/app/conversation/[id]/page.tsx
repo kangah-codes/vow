@@ -16,8 +16,8 @@ import {
 	type ChatMsg,
 } from "@/components/conversation";
 import { useConversation } from "@/lib/hooks/useConversation";
-import { getAccessToken } from "@/lib/cookies";
-import { formatTime } from "@/lib/utils";
+import { getAccessToken } from "@/lib/utils/cookies";
+import { formatTime } from "@/lib/utils/utils";
 
 const WS_URL = "ws://localhost:3001";
 

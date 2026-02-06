@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/utils";
 
 export type HowItWorksStepProps = {
 	/** Step number (1, 2, 3, etc.) */

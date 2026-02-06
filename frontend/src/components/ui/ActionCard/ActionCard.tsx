@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/utils";
 
 export type ActionCardProps = {
 	/** Card heading (displayed uppercase, Recoleta Bold) */
@@ -64,9 +64,7 @@ export function ActionCard({
 						className="mt-8 h-14 w-full max-w-md rounded-lg border border-brand-cream bg-white px-4 text-base text-brand-brown outline-none transition placeholder:text-brand-brown/40 focus:border-brand-brown/40 disabled:opacity-50 md:mt-10"
 					/>
 					{error && (
-						<p className="mt-2 text-sm font-medium text-red-600">
-							{error}
-						</p>
+						<p className="mt-2 text-sm font-medium text-red-600">{error}</p>
 					)}
 				</>
 			)}

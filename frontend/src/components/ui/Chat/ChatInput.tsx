@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useEffect } from "react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/utils";
 
 export type ChatInputProps = {
 	value: string;
@@ -35,10 +35,12 @@ export function ChatInput({
 				className,
 			)}
 		>
-			<div className={cn(
-				"bg-amber-50 border border-amber-200 w-full flex items-center gap-3 rounded-full px-3 py-2",
-				disabled && "opacity-50",
-			)}>
+			<div
+				className={cn(
+					"bg-amber-50 border border-amber-200 w-full flex items-center gap-3 rounded-full px-3 py-2",
+					disabled && "opacity-50",
+				)}
+			>
 				<input
 					ref={inputRef}
 					type="text"

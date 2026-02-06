@@ -9,7 +9,7 @@ import { useProfiles, type Profile } from "@/lib/hooks/useProfiles";
 import { useLogout } from "@/lib/hooks/useLogout";
 import { useDeleteProfile } from "@/lib/hooks/useDeleteProfile";
 import { useFocusGroupPrompt } from "@/lib/hooks/useFocusGroupPrompt";
-import { downloadProfilePdf } from "@/lib/downloadProfilePdf";
+import { downloadProfilePdf } from "@/lib/utils/downloadProfilePdf";
 import {
 	ProfilesCarousel,
 	EmptyProfiles,
