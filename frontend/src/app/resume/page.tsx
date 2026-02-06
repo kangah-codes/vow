@@ -71,25 +71,43 @@ export default function ResumePage() {
 							validate(code);
 						}}
 					>
-						<label className="text-sm font-bold text-brand-brown">
+						<label
+							htmlFor="resume-access-code"
+							className="text-sm font-bold text-brand-brown"
+						>
 							Access Code:
 						</label>
 						<input
+							id="resume-access-code"
 							type="text"
 							placeholder="XXXX - XXXX"
+							aria-label="Access code"
 							value={code}
 							onChange={(e) => setCode(e.target.value)}
 							maxLength={9}
 							required
 							disabled={isValidating}
 							className="mt-2 h-14 w-full rounded-lg border border-brand-cream bg-white text-center text-xl font-semibold tracking-widest text-brand-brown outline-none transition placeholder:text-brand-brown/30 focus:border-brand-brown/40 disabled:opacity-50"
+							aria-invalid={!!error}
+							aria-describedby={
+								error
+									? "resume-access-code-error"
+									: "resume-access-code-hint"
+							}
 						/>
 						{error ? (
-							<p className="mt-2 text-sm font-medium text-red-600">
+							<p
+								id="resume-access-code-error"
+								className="mt-2 text-sm font-medium text-red-600"
+								role="alert"
+							>
 								{error}
 							</p>
 						) : (
-							<p className="mt-2 text-sm text-brand-brown/50">
+							<p
+								id="resume-access-code-hint"
+								className="mt-2 text-sm text-brand-brown/50"
+							>
 								Format: XXXX-XXXX (e.g., XK7P-M4N2)
 							</p>
 						)}

@@ -55,6 +55,7 @@ export function ChatInput({
 					placeholder={placeholder}
 					disabled={disabled}
 					className="h-10 flex-1 rounded-lg bg-amber-50/60 px-4 text-sm text-brand-brown outline-none placeholder:text-brand-brown/40 disabled:cursor-not-allowed md:h-12 md:text-base"
+					aria-label={placeholder}
 				/>
 				<button
 					type="button"

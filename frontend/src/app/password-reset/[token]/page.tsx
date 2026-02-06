@@ -137,7 +137,10 @@ export default function PasswordResetPage() {
 							</p>
 
 							{error && (
-								<div className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
+								<div
+									className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700"
+									role="alert"
+								>
 									{error}
 								</div>
 							)}
@@ -146,9 +149,14 @@ export default function PasswordResetPage() {
 								className="mt-8 space-y-5"
 								onSubmit={handleSubmit}
 							>
+								<label htmlFor="reset-password" className="sr-only">
+									New password
+								</label>
 								<input
+									id="reset-password"
 									type="password"
 									placeholder="New password"
+									aria-label="New password"
 									value={password}
 									onChange={(e) =>
 										setPassword(e.target.value)
@@ -157,10 +165,19 @@ export default function PasswordResetPage() {
 									minLength={8}
 									disabled={isSubmitting}
 									className="h-14 w-full rounded-lg border border-brand-cream bg-white px-4 text-base text-brand-brown outline-none transition placeholder:text-brand-brown/40 focus:border-brand-brown/40 disabled:opacity-50"
+									aria-invalid={!!error}
+									aria-describedby={
+										error ? "reset-password-error" : undefined
+									}
 								/>
+								<label htmlFor="reset-confirm-password" className="sr-only">
+									Confirm new password
+								</label>
 								<input
+									id="reset-confirm-password"
 									type="password"
 									placeholder="Confirm new password"
+									aria-label="Confirm new password"
 									value={confirmPassword}
 									onChange={(e) =>
 										setConfirmPassword(e.target.value)
@@ -169,7 +186,16 @@ export default function PasswordResetPage() {
 									minLength={8}
 									disabled={isSubmitting}
 									className="h-14 w-full rounded-lg border border-brand-cream bg-white px-4 text-base text-brand-brown outline-none transition placeholder:text-brand-brown/40 focus:border-brand-brown/40 disabled:opacity-50"
+									aria-invalid={!!error}
+									aria-describedby={
+										error ? "reset-password-error" : undefined
+									}
 								/>
+								{error && (
+									<span id="reset-password-error" className="sr-only">
+										{error}
+									</span>
+								)}
 
 								<button
 									type="submit"

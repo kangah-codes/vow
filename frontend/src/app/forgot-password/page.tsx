@@ -93,7 +93,10 @@ export default function ForgotPasswordPage() {
 							</p>
 
 							{error && (
-								<div className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
+								<div
+									className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700"
+									role="alert"
+								>
 									{error}
 								</div>
 							)}
@@ -138,15 +141,29 @@ export default function ForgotPasswordPage() {
 									}
 								}}
 							>
+								<label htmlFor="forgot-password-email" className="sr-only">
+									Email
+								</label>
 								<input
+									id="forgot-password-email"
 									type="email"
 									placeholder="Email"
+									aria-label="Email"
 									value={email}
 									onChange={(e) => setEmail(e.target.value)}
 									required
 									disabled={isSubmitting}
 									className="h-14 w-full rounded-lg border border-brand-cream bg-white px-4 text-base text-brand-brown outline-none transition placeholder:text-brand-brown/40 focus:border-brand-brown/40 disabled:opacity-50"
+									aria-invalid={!!error}
+									aria-describedby={
+										error ? "forgot-password-error" : undefined
+									}
 								/>
+								{error && (
+									<span id="forgot-password-error" className="sr-only">
+										{error}
+									</span>
+								)}
 
 								<button
 									type="submit"

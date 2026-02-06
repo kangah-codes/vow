@@ -62,6 +62,7 @@ export default function HelpPage() {
 						id="help-search"
 						type="search"
 						placeholder="Search for help..."
+						aria-label="Search for help"
 						value={search}
 						onChange={(e) => setSearch(e.target.value)}
 						className="h-14 w-full rounded-lg border border-brand-cream bg-white pl-11 pr-4 text-base text-brand-brown outline-none transition placeholder:text-brand-brown/40 focus:border-brand-brown/40"

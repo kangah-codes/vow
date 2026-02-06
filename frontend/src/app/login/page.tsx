@@ -99,14 +99,21 @@ export default function LoginPage() {
 					</h1>
 
 					{login.error && (
-						<div className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
+						<div
+							className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700"
+							role="alert"
+						>
 							{login.error.message}
 						</div>
 					)}
 
 					<form className="mt-10 space-y-5" onSubmit={handleSubmit(onSubmit)}>
 						<div>
+							<label htmlFor="login-email" className="sr-only">
+								Email
+							</label>
 							<input
+								id="login-email"
 								type="email"
 								placeholder="Email"
 								{...register("email", {
@@ -117,24 +124,44 @@ export default function LoginPage() {
 									},
 								})}
 								className={errors.email ? errorInputClass : inputClass}
+								aria-invalid={!!errors.email}
+								aria-describedby={
+									errors.email ? "login-email-error" : undefined
+								}
 							/>
 							{errors.email && (
-								<p className="mt-1.5 text-sm text-red-600">
+								<p
+									id="login-email-error"
+									className="mt-1.5 text-sm text-red-600"
+									role="alert"
+								>
 									{errors.email.message}
 								</p>
 							)}
 						</div>
 						<div>
+							<label htmlFor="login-password" className="sr-only">
+								Password
+							</label>
 							<input
+								id="login-password"
 								type="password"
 								placeholder="Password"
 								{...register("password", {
 									required: "Password is required",
 								})}
 								className={errors.password ? errorInputClass : inputClass}
+								aria-invalid={!!errors.password}
+								aria-describedby={
+									errors.password ? "login-password-error" : undefined
+								}
 							/>
 							{errors.password && (
-								<p className="mt-1.5 text-sm text-red-600">
+								<p
+									id="login-password-error"
+									className="mt-1.5 text-sm text-red-600"
+									role="alert"
+								>
 									{errors.password.message}
 								</p>
 							)}

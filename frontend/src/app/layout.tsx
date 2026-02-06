@@ -34,7 +34,7 @@ export default function RootLayout({
 			<body className={`${inter.variable} antialiased`}>
 				<Providers>
 					<ErrorBoundary>
-						{/* <OfflineDetector /> */}
+						<OfflineDetector />
 						{children}
 					</ErrorBoundary>
 				</Providers>

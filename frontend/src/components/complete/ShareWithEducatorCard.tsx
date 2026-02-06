@@ -18,9 +18,14 @@ export function ShareWithEducatorCard({
 			<h2 className="font-display text-xl font-bold text-brand-brown">
 				Share with Educator
 			</h2>
+			<label htmlFor="share-educator-email" className="sr-only">
+				Teacher email address
+			</label>
 			<input
+				id="share-educator-email"
 				type="email"
 				placeholder="Teacher's email address"
+				aria-label="Teacher email address"
 				value={teacherEmail}
 				onChange={(e) => onTeacherEmailChange(e.target.value)}
 				className="mt-4 h-14 w-full rounded-lg border border-brand-cream bg-white px-4 text-base text-brand-brown outline-none transition placeholder:text-brand-brown/40 focus:border-brand-brown/40"

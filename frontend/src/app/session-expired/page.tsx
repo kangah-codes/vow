@@ -54,9 +54,14 @@ export default function SessionExpiredPage() {
 					<h3 className="text-center text-sm font-bold text-brand-brown">
 						Or Resume with Access Code
 					</h3>
+					<label htmlFor="session-expired-access-code" className="sr-only">
+						Access code
+					</label>
 					<input
+						id="session-expired-access-code"
 						type="text"
 						placeholder="XXXX - XXXX"
+						aria-label="Access code"
 						value={accessCode}
 						onChange={(e) => setAccessCode(e.target.value)}
 						className="mt-3 h-14 w-full rounded-lg border border-brand-cream bg-white px-4 text-center text-lg tracking-widest text-brand-brown outline-none transition placeholder:text-brand-brown/30 focus:border-brand-brown/40"

@@ -119,7 +119,10 @@ export default function StartPage() {
 					</div>
 
 					{createProfile.error && (
-						<div className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">
+						<div
+							className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600"
+							role="alert"
+						>
 							{createProfile.error.message}
 						</div>
 					)}
@@ -127,19 +130,31 @@ export default function StartPage() {
 					<form className="mt-8 space-y-5" onSubmit={handleSubmit(onSubmit)}>
 						{/* Student's Name */}
 						<div>
-							<label className="text-sm font-bold text-brand-brown">
+							<label
+								htmlFor="start-student-name"
+								className="text-sm font-bold text-brand-brown"
+							>
 								Student&apos;s Name <span className="text-brand-orange">*</span>
 							</label>
 							<input
+								id="start-student-name"
 								type="text"
 								placeholder="First and Last Name"
 								{...register("studentName", {
 									required: "Student's name is required",
 								})}
 								className="mt-1.5 h-14 w-full rounded-lg border border-brand-cream bg-white px-4 text-base text-brand-brown outline-none transition placeholder:text-brand-brown/40 focus:border-brand-brown/40"
+								aria-invalid={!!errors.studentName}
+								aria-describedby={
+									errors.studentName ? "start-student-name-error" : undefined
+								}
 							/>
 							{errors.studentName && (
-								<p className="mt-1 text-sm text-red-500">
+								<p
+									id="start-student-name-error"
+									className="mt-1 text-sm text-red-500"
+									role="alert"
+								>
 									{errors.studentName.message}
 								</p>
 							)}
@@ -148,14 +163,22 @@ export default function StartPage() {
 						{/* Grade Level + Age */}
 						<div className="grid gap-5 md:grid-cols-2">
 							<div>
-								<label className="text-sm font-bold text-brand-brown">
+								<label
+									htmlFor="start-grade-level"
+									className="text-sm font-bold text-brand-brown"
+								>
 									Grade Level <span className="text-brand-orange">*</span>
 								</label>
 								<select
+									id="start-grade-level"
 									{...register("gradeLevel", {
 										required: "Grade level is required",
 									})}
 									className="mt-1.5 h-14 w-full appearance-none rounded-lg border border-brand-cream bg-white px-4 text-base text-brand-brown outline-none transition focus:border-brand-brown/40"
+									aria-invalid={!!errors.gradeLevel}
+									aria-describedby={
+										errors.gradeLevel ? "start-grade-level-error" : undefined
+									}
 								>
 									<option value="" disabled>
 										Select grade
@@ -176,16 +199,24 @@ export default function StartPage() {
 									<option value="12">12th Grade</option>
 								</select>
 								{errors.gradeLevel && (
-									<p className="mt-1 text-sm text-red-500">
+									<p
+										id="start-grade-level-error"
+										className="mt-1 text-sm text-red-500"
+										role="alert"
+									>
 										{errors.gradeLevel.message}
 									</p>
 								)}
 							</div>
 							<div>
-								<label className="text-sm font-bold text-brand-brown">
+								<label
+									htmlFor="start-age"
+									className="text-sm font-bold text-brand-brown"
+								>
 									Age (Optional)
 								</label>
 								<select
+									id="start-age"
 									{...register("age")}
 									className="mt-1.5 h-14 w-full appearance-none rounded-lg border border-brand-cream bg-white px-4 text-base text-brand-brown outline-none transition focus:border-brand-brown/40"
 								>
@@ -201,10 +232,14 @@ export default function StartPage() {
 
 						{/* School */}
 						<div>
-							<label className="text-sm font-bold text-brand-brown">
+							<label
+								htmlFor="start-school"
+								className="text-sm font-bold text-brand-brown"
+							>
 								School (Optional)
 							</label>
 							<input
+								id="start-school"
 								type="text"
 								placeholder="School name"
 								{...register("school")}
@@ -214,14 +249,22 @@ export default function StartPage() {
 
 						{/* Relationship */}
 						<div>
-							<label className="text-sm font-bold text-brand-brown">
+							<label
+								htmlFor="start-relationship"
+								className="text-sm font-bold text-brand-brown"
+							>
 								Your Relationship <span className="text-brand-orange">*</span>
 							</label>
 							<select
+								id="start-relationship"
 								{...register("relationship", {
 									required: "Relationship is required",
 								})}
 								className="mt-1.5 h-14 w-full appearance-none rounded-lg border border-brand-cream bg-white px-4 text-base text-brand-brown outline-none transition focus:border-brand-brown/40"
+								aria-invalid={!!errors.relationship}
+								aria-describedby={
+									errors.relationship ? "start-relationship-error" : undefined
+								}
 							>
 								<option value="" disabled>
 									Select relationship
@@ -234,7 +277,11 @@ export default function StartPage() {
 								<option value="other">Other</option>
 							</select>
 							{errors.relationship && (
-								<p className="mt-1 text-sm text-red-500">
+								<p
+									id="start-relationship-error"
+									className="mt-1 text-sm text-red-500"
+									role="alert"
+								>
 									{errors.relationship.message}
 								</p>
 							)}

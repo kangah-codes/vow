@@ -8,7 +8,12 @@ interface ReadOnlyChatPanelProps {
 export function ReadOnlyChatPanel({ messages }: ReadOnlyChatPanelProps) {
 	return (
 		<div className="flex h-full flex-col rounded-2xl bg-white min-h-0">
-			<div className="flex-1 space-y-6 overflow-y-auto p-5 md:p-8 min-h-0">
+			<div
+				className="flex-1 space-y-6 overflow-y-auto p-5 md:p-8 min-h-0"
+				role="log"
+				aria-live="polite"
+				aria-relevant="additions text"
+			>
 				{messages.map((msg) => (
 					<ChatBubble key={msg.id} {...msg} />
 				))}

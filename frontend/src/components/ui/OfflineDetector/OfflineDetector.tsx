@@ -4,7 +4,9 @@ import { useEffect, useState } from "react";
 import { ConnectionLost } from "@/components/ui/ConnectionLost";
 
 export function OfflineDetector() {
-	const [isOffline, setIsOffline] = useState(() => !navigator.onLine);
+	const [isOffline, setIsOffline] = useState(() =>
+		typeof navigator === "undefined" ? false : !navigator.onLine,
+	);
 
 	useEffect(() => {
 		const handleOffline = () => setIsOffline(true);

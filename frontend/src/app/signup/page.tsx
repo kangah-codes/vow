@@ -113,14 +113,21 @@ export default function SignupPage() {
 					</h1>
 
 					{signup.error && (
-						<div className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
+						<div
+							className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700"
+							role="alert"
+						>
 							{signup.error.message}
 						</div>
 					)}
 
 					<form className="mt-8" onSubmit={handleSubmit(onSubmit)}>
 						{/* Role selection */}
-						<fieldset>
+						<fieldset
+							aria-describedby={
+								errors.role ? "signup-role-error" : undefined
+							}
+						>
 							<legend className="text-base font-bold text-brand-brown">
 								I am a:
 							</legend>
@@ -143,7 +150,11 @@ export default function SignupPage() {
 								))}
 							</div>
 							{errors.role && (
-								<p className="mt-1.5 text-sm text-red-600">
+								<p
+									id="signup-role-error"
+									className="mt-1.5 text-sm text-red-600"
+									role="alert"
+								>
 									{errors.role.message}
 								</p>
 							)}
@@ -152,39 +163,67 @@ export default function SignupPage() {
 						{/* Text inputs */}
 						<div className="mt-8 space-y-5">
 							<div>
+								<label htmlFor="signup-first-name" className="sr-only">
+									First Name
+								</label>
 								<input
+									id="signup-first-name"
 									type="text"
 									placeholder="First Name"
 									{...register("firstName", {
 										required: "First name is required",
 									})}
 									className={errors.firstName ? errorInputClass : inputClass}
+									aria-invalid={!!errors.firstName}
+									aria-describedby={
+										errors.firstName ? "signup-first-name-error" : undefined
+									}
 								/>
 								{errors.firstName && (
-									<p className="mt-1.5 text-sm text-red-600">
+									<p
+										id="signup-first-name-error"
+										className="mt-1.5 text-sm text-red-600"
+										role="alert"
+									>
 										{errors.firstName.message}
 									</p>
 								)}
 							</div>
 
 							<div>
+								<label htmlFor="signup-last-name" className="sr-only">
+									Last Name
+								</label>
 								<input
+									id="signup-last-name"
 									type="text"
 									placeholder="Last Name"
 									{...register("lastName", {
 										required: "Last name is required",
 									})}
 									className={errors.lastName ? errorInputClass : inputClass}
+									aria-invalid={!!errors.lastName}
+									aria-describedby={
+										errors.lastName ? "signup-last-name-error" : undefined
+									}
 								/>
 								{errors.lastName && (
-									<p className="mt-1.5 text-sm text-red-600">
+									<p
+										id="signup-last-name-error"
+										className="mt-1.5 text-sm text-red-600"
+										role="alert"
+									>
 										{errors.lastName.message}
 									</p>
 								)}
 							</div>
 
 							<div>
+								<label htmlFor="signup-email" className="sr-only">
+									Email
+								</label>
 								<input
+									id="signup-email"
 									type="email"
 									placeholder="Email"
 									{...register("email", {
@@ -195,16 +234,28 @@ export default function SignupPage() {
 										},
 									})}
 									className={errors.email ? errorInputClass : inputClass}
+									aria-invalid={!!errors.email}
+									aria-describedby={
+										errors.email ? "signup-email-error" : undefined
+									}
 								/>
 								{errors.email && (
-									<p className="mt-1.5 text-sm text-red-600">
+									<p
+										id="signup-email-error"
+										className="mt-1.5 text-sm text-red-600"
+										role="alert"
+									>
 										{errors.email.message}
 									</p>
 								)}
 							</div>
 
 							<div>
+								<label htmlFor="signup-password" className="sr-only">
+									Password
+								</label>
 								<input
+									id="signup-password"
 									type="password"
 									placeholder="Password"
 									{...register("password", {
@@ -215,19 +266,31 @@ export default function SignupPage() {
 										},
 									})}
 									className={errors.password ? errorInputClass : inputClass}
+									aria-invalid={!!errors.password}
+									aria-describedby={
+										errors.password ? "signup-password-error" : undefined
+									}
 								/>
 								<p className="mt-1.5 text-sm text-brand-brown/50">
 									Must be 8+ characters
 								</p>
 								{errors.password && (
-									<p className="mt-0.5 text-sm text-red-600">
+									<p
+										id="signup-password-error"
+										className="mt-0.5 text-sm text-red-600"
+										role="alert"
+									>
 										{errors.password.message}
 									</p>
 								)}
 							</div>
 
 							<div>
+								<label htmlFor="signup-confirm-password" className="sr-only">
+									Confirm Password
+								</label>
 								<input
+									id="signup-confirm-password"
 									type="password"
 									placeholder="Confirm Password"
 									{...register("confirmPassword", {
@@ -238,9 +301,19 @@ export default function SignupPage() {
 									className={
 										errors.confirmPassword ? errorInputClass : inputClass
 									}
+									aria-invalid={!!errors.confirmPassword}
+									aria-describedby={
+										errors.confirmPassword
+											? "signup-confirm-password-error"
+											: undefined
+									}
 								/>
 								{errors.confirmPassword && (
-									<p className="mt-1.5 text-sm text-red-600">
+									<p
+										id="signup-confirm-password-error"
+										className="mt-1.5 text-sm text-red-600"
+										role="alert"
+									>
 										{errors.confirmPassword.message}
 									</p>
 								)}
@@ -255,6 +328,10 @@ export default function SignupPage() {
 									required: "You must agree to the terms",
 								})}
 								className="mt-0.5 size-5 shrink-0 rounded border-brand-cream accent-brand-brown"
+								aria-invalid={!!errors.agreedToTerms}
+								aria-describedby={
+									errors.agreedToTerms ? "signup-terms-error" : undefined
+								}
 							/>
 							<span>
 								I agree to the{" "}
@@ -274,7 +351,11 @@ export default function SignupPage() {
 							</span>
 						</label>
 						{errors.agreedToTerms && (
-							<p className="mt-1.5 text-sm text-red-600">
+							<p
+								id="signup-terms-error"
+								className="mt-1.5 text-sm text-red-600"
+								role="alert"
+							>
 								{errors.agreedToTerms.message}
 							</p>
 						)}

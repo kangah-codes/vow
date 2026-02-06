@@ -39,6 +39,8 @@ export function ActionCard({
 	error,
 	className,
 }: ActionCardProps) {
+	const inputId = React.useId();
+	const errorId = `${inputId}-error`;
 	return (
 		<div
 			className={cn(
@@ -56,15 +58,25 @@ export function ActionCard({
 			{input && (
 				<>
 					<input
+						id={inputId}
 						type="text"
 						placeholder={input.placeholder}
 						value={input.value}
 						onChange={(e) => input.onChange(e.target.value)}
 						disabled={loading}
 						className="mt-8 h-14 w-full max-w-md rounded-lg border border-brand-cream bg-white px-4 text-base text-brand-brown outline-none transition placeholder:text-brand-brown/40 focus:border-brand-brown/40 disabled:opacity-50 md:mt-10"
+						aria-label={input.placeholder}
+						aria-invalid={!!error}
+						aria-describedby={error ? errorId : undefined}
 					/>
 					{error && (
-						<p className="mt-2 text-sm font-medium text-red-600">{error}</p>
+						<p
+							id={errorId}
+							className="mt-2 text-sm font-medium text-red-600"
+							role="alert"
+						>
+							{error}
+						</p>
 					)}
 				</>
 			)}

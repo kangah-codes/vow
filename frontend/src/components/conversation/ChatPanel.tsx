@@ -38,6 +38,9 @@ export function ChatPanel({
 			<div
 				data-chat-messages
 				className="flex-1 space-y-6 overflow-y-auto p-5 md:p-8 min-h-0"
+				role="log"
+				aria-live="polite"
+				aria-relevant="additions text"
 			>
 				{messages.map((msg) => (
 					<ChatBubble key={msg.id} {...msg} />
