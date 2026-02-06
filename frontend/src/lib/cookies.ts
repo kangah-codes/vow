@@ -10,3 +10,9 @@ export function clearAuthCookies(): void {
 	document.cookie = "accessToken=; path=/; max-age=0";
 	document.cookie = "refreshToken=; path=/; max-age=0";
 }
+
+export function getAccessToken(): string | undefined {
+	if (typeof document === "undefined") return undefined;
+	const match = document.cookie.match(/(?:^|; )accessToken=([^;]*)/);
+	return match?.[1];
+}

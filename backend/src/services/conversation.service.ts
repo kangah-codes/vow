@@ -125,7 +125,7 @@ export function buildSystemPrompt(
 			- After you feel you have gathered enough rich detail about this element (typically 3-5 exchanges), signal that the section is complete
 			- You MUST have at least 3 back-and-forth exchanges specifically about "${currentSection}" before marking it complete — NEVER mark a section complete on the first or second exchange
 			- When you mark a section complete, your "message" MUST include a natural transition that introduces the next topic and asks the first question about it so the conversation flows smoothly
-			${isLastSection ? `- IMPORTANT: This is the FINAL element. When you mark this section complete, do NOT transition to a new topic. Instead, warmly thank the family for participating and sharing so many wonderful details about ${profile.studentName}. Celebrate the child's genius and let the family know that their Genius Profile has been created. Keep it heartfelt and affirming. Do NOT ask any follow-up questions — this is the closing message.` : ""}
+			${isLastSection ? `- IMPORTANT: This is the FINAL element. When you mark this section complete, do NOT transition to a new topic. Instead, warmly thank the ${profile.relationship} for participating and sharing so many wonderful details about ${profile.studentName}. Celebrate the child's genius and let the family know that their Genius Profile has been created. Keep it heartfelt and affirming. Do NOT ask any follow-up questions — this is the closing message.` : ""}
 
 			RESPONSE FORMAT:
 			You MUST respond with valid JSON only. No text outside the JSON.
@@ -153,23 +153,49 @@ export function buildSystemPrompt(
 			- Do NOT ask for clarification or say you don't understand
 			- Do NOT respond to inappropriate or off-topic messages — gently steer the conversation back to the Genius Profile
 			- Keep the conversation natural and flowing, and end every message with a follow-up question to encourage continued engagement
-			- Previous messages in the conversation history are shown as plain text (not JSON) — focus on the current element as specified above`;
+			- Previous messages in the conversation history are shown as plain text (not JSON) — focus on the current element as specified above
+			- CONCISENESS REMINDER: Keep every response to 2-4 short sentences plus one question. Do NOT increase response length as the conversation progresses. Shorter is always better.`;
 }
 
 export function buildMessageHistory(
 	messages: IMessage[],
 ): Array<{ role: "user" | "assistant"; content: string }> {
-	// take the last 20 messages for context
-	const recent = messages.slice(-20);
+	const filtered = messages.filter(
+		(msg) => msg.sender === "user" || msg.sender === "ai",
+	);
 
-	return recent
-		.filter((msg) => msg.sender === "user" || msg.sender === "ai")
-		.map((msg) => ({
-			role: (msg.sender === "user" ? "user" : "assistant") as
-				| "user"
-				| "assistant",
-			content: msg.message,
-		}));
+	// Keep the last 6 messages verbatim (3 back-and-forth exchanges).
+	// For the older messages in the window, truncate long assistant replies
+	// so the model keeps a sense of the conversation without bloated context.
+	const RECENT_COUNT = 6;
+	const OLDER_WINDOW = 14;
+	const OLDER_ASSISTANT_CHAR_LIMIT = 200;
+
+	const recentStart = Math.max(0, filtered.length - RECENT_COUNT);
+	const olderStart = Math.max(0, recentStart - OLDER_WINDOW);
+
+	const older = filtered.slice(olderStart, recentStart);
+	const recent = filtered.slice(recentStart);
+
+	const toMsg = (msg: IMessage) => ({
+		role: (msg.sender === "user" ? "user" : "assistant") as
+			| "user"
+			| "assistant",
+		content: msg.message,
+	});
+
+	const olderMapped = older.map((msg) => {
+		const m = toMsg(msg);
+		if (
+			m.role === "assistant" &&
+			m.content.length > OLDER_ASSISTANT_CHAR_LIMIT
+		) {
+			m.content = m.content.slice(0, OLDER_ASSISTANT_CHAR_LIMIT) + "…";
+		}
+		return m;
+	});
+
+	return [...olderMapped, ...recent.map(toMsg)];
 }
 
 export interface AIResponse {
@@ -252,18 +278,26 @@ export async function updateProfileProgress(
 	const profile = await Profile.findById(profileId);
 	if (!profile) return null;
 
-	logger.info(`[SECTION DEBUG] updateProfileProgress called for section: "${currentSection}"`);
-	logger.info(`[SECTION DEBUG] profile sections before update: ${JSON.stringify(profile.sections.map(s => ({ title: s.title, status: s.status, hasDescription: !!s.description })))}`);
+	logger.info(
+		`[SECTION DEBUG] updateProfileProgress called for section: "${currentSection}"`,
+	);
+	logger.info(
+		`[SECTION DEBUG] profile sections before update: ${JSON.stringify(profile.sections.map((s) => ({ title: s.title, status: s.status, hasDescription: !!s.description })))}`,
+	);
 
 	// Update the completed section
 	const sectionIndex = profile.sections.findIndex(
 		(s) => s.title === currentSection,
 	);
-	logger.info(`[SECTION DEBUG] sectionIndex for "${currentSection}": ${sectionIndex}`);
+	logger.info(
+		`[SECTION DEBUG] sectionIndex for "${currentSection}": ${sectionIndex}`,
+	);
 	if (sectionIndex !== -1) {
 		profile.sections[sectionIndex].status = "complete";
 		if (aiResponse.sectionContent) {
-			logger.info(`[SECTION DEBUG] writing description to section[${sectionIndex}] ("${profile.sections[sectionIndex].title}"): "${aiResponse.sectionContent.substring(0, 80)}..."`);
+			logger.info(
+				`[SECTION DEBUG] writing description to section[${sectionIndex}] ("${profile.sections[sectionIndex].title}"): "${aiResponse.sectionContent.substring(0, 80)}..."`,
+			);
 			profile.sections[sectionIndex].description = aiResponse.sectionContent;
 		}
 	}

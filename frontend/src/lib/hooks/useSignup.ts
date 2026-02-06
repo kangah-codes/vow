@@ -8,7 +8,7 @@ interface SignupRequest {
 	lastName: string;
 	role: string;
 	agreedToTerms: boolean;
-	focusGroupOptIn: boolean;
+	focusGroupOptIn?: boolean;
 }
 
 interface SignupResponse {

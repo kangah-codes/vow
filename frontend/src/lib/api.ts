@@ -1,3 +1,5 @@
+import { getAccessToken } from "@/lib/cookies";
+
 const API_BASE_URL = "http://localhost:3001/api";
 
 export class ApiError extends Error {
@@ -14,12 +16,6 @@ let isLoggingOut = false;
 
 export function setLoggingOut(value: boolean) {
 	isLoggingOut = value;
-}
-
-function getAccessToken(): string | undefined {
-	if (typeof document === "undefined") return undefined;
-	const match = document.cookie.match(/(?:^|; )accessToken=([^;]*)/);
-	return match?.[1];
 }
 
 export async function apiFetch<T>(

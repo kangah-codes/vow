@@ -38,5 +38,6 @@ export function useProfiles() {
 			const res = await apiFetch<ProfilesResponse>("/profiles");
 			return res.data;
 		},
+		refetchOnMount: "always",
 	});
 }
