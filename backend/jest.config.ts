@@ -6,8 +6,8 @@ const config: Config = {
   transform: {
     "^.+\\.ts$": ["ts-jest", { tsconfig: "tsconfig.test.json" }],
   },
-  roots: ["<rootDir>/tests"],
-  testMatch: ["**/*.test.ts", "**/*.spec.ts"],
+  roots: ["<rootDir>/src"],
+  testMatch: ["**/__tests__/**/*.test.ts", "**/__tests__/**/*.spec.ts"],
   collectCoverageFrom: [
     "src/**/*.ts",
     "!src/server.ts",
