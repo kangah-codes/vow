@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, notFound } from "next/navigation";
 import { Nav } from "@/components/ui/Nav";
 import { ProfileProgress } from "@/components/ui/ProfileProgress";
 import {
@@ -41,11 +41,12 @@ export default function ProfilePage() {
 	}
 
 	if (error) {
+		if (error.status === 404) notFound();
 		throw error;
 	}
 
 	if (!data) {
-		throw new Error("Conversation not found");
+		notFound();
 	}
 
 	if (data.profile.status !== "complete") {
@@ -55,9 +56,9 @@ export default function ProfilePage() {
 	const { profile } = data;
 
 	return (
-		<div className="relative isolate flex min-h-screen flex-col bg-brand-brown">
+		<div className="relative isolate flex min-h-screen flex-col bg-brand-brown print:block print:min-h-0 print:bg-white">
 			<Nav
-				className="relative z-20"
+				className="relative z-20 print:hidden"
 				actions={[
 					{
 						label: "Profile Complete",
@@ -68,12 +69,14 @@ export default function ProfilePage() {
 				]}
 			/>
 
-			<DecorativeSwooshes />
+			<div className="print:hidden">
+				<DecorativeSwooshes />
+			</div>
 
 			{/* Content */}
-			<div className="relative z-10 grid flex-1 grid-cols-1 gap-5 p-4 md:grid-cols-[3fr_2fr] md:p-6">
+			<div className="relative z-10 grid flex-1 grid-cols-1 gap-5 p-4 md:grid-cols-[3fr_2fr] md:p-6 print:block print:p-0">
 				{/* Left panel: Profile Complete + Sections */}
-				<div id="profile-summary" className="rounded-2xl bg-white p-6 md:p-10">
+				<div id="profile-summary" className="rounded-2xl bg-white p-6 md:p-10 print:rounded-none print:p-4">
 					<div className="text-center">
 						<span className="text-5xl" aria-hidden="true">
 							🎉
@@ -97,7 +100,7 @@ export default function ProfilePage() {
 				</div>
 
 				{/* Right panel: Actions */}
-				<div className="flex flex-col gap-5">
+				<div className="flex flex-col gap-5 print:hidden">
 					<DownloadShareCard
 						onDownload={handleDownloadPdf}
 						onPrint={handlePrint}

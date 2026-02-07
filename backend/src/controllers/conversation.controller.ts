@@ -33,6 +33,13 @@ export async function getConversation(
 			},
 		});
 	} catch (error) {
+		if ((error as { name?: string }).name === "CastError") {
+			res.status(404).json({
+				success: false,
+				error: "Conversation not found",
+			});
+			return;
+		}
 		res.status(500).json({
 			success: false,
 			error: "Failed to fetch conversation",

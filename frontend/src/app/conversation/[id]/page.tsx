@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, notFound } from "next/navigation";
 import * as Tabs from "@radix-ui/react-tabs";
 import { Nav } from "@/components/ui/Nav";
 import {
@@ -212,11 +212,12 @@ export default function ConversationPage() {
 	}
 
 	if (error) {
+		if (error.status === 404) notFound();
 		throw error;
 	}
 
 	if (!data) {
-		throw new Error("Conversation not found");
+		notFound();
 	}
 
 	const { profile } = data;
