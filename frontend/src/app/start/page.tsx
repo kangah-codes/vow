@@ -319,6 +319,7 @@ export default function StartPage() {
 					<div className="mt-6 text-center">
 						<Link
 							href="/dashboard"
+							aria-label="Back to dashboard"
 							className="inline-flex items-center gap-1.5 text-sm font-semibold uppercase tracking-wider text-brand-orange transition-colors hover:text-brand-orange/80"
 						>
 							<span aria-hidden="true">&larr;</span>

@@ -77,7 +77,7 @@ export default function Home() {
 						<ActionCard
 							title="Start New Profile"
 							description="Begin a guided conversation to create your child's profile"
-							buttonLabel="Start"
+							buttonLabel="Start New Profile"
 							buttonHref="/start"
 						/>
 						<ActionCard

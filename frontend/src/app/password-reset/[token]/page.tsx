@@ -122,6 +122,7 @@ export default function PasswordResetPage() {
 							</p>
 							<Link
 								href="/login"
+								aria-label="Go to login"
 								className="mt-8 inline-flex h-13 w-full items-center justify-center rounded-full bg-brand-brown text-base font-bold uppercase tracking-wider text-white transition-colors hover:bg-brand-brown/90"
 							>
 								Go to Login
@@ -210,6 +211,7 @@ export default function PasswordResetPage() {
 
 							<Link
 								href="/login"
+								aria-label="Back to login"
 								className="mt-6 inline-flex items-center gap-1.5 text-sm font-semibold uppercase tracking-wider text-brand-orange transition-colors hover:text-brand-orange/80"
 							>
 								<span aria-hidden="true">&larr;</span>

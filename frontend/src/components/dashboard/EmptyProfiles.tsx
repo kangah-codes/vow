@@ -31,6 +31,7 @@ export function EmptyProfiles() {
 			</p>
 			<Link
 				href="/start"
+				aria-label="Start new profile"
 				className="mt-6 inline-flex h-11 items-center justify-center rounded-full bg-brand-brown px-6 text-sm font-bold uppercase tracking-wider text-white transition-colors hover:bg-brand-brown/90"
 			>
 				Start New Profile

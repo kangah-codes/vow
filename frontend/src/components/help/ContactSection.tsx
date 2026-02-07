@@ -26,6 +26,7 @@ export function ContactSection() {
 			<div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
 				<Link
 					href="mailto:support@villageofwisdom.org"
+					aria-label="Email support at support@villageofwisdom.org"
 					className="flex flex-col items-center gap-3 rounded-xl border border-stone-200 bg-white p-5 text-brand-brown transition-colors hover:border-stone-300 hover:bg-stone-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
 				>
 					<EmailSupportIcon />
@@ -52,6 +53,7 @@ export function ContactSection() {
 
 				<Link
 					href="/docs"
+					aria-label="View documentation"
 					className="flex flex-col items-center gap-3 rounded-xl border border-stone-200 bg-white p-5 text-brand-brown transition-colors hover:border-stone-300 hover:bg-stone-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
 				>
 					<DocumentationIcon />

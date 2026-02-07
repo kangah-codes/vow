@@ -29,12 +29,14 @@ export default function SessionExpiredPage() {
 				<div className="mt-8 flex w-full max-w-md flex-col gap-3 sm:flex-row sm:justify-center">
 					<Link
 						href="/login"
+						aria-label="Log in"
 						className="inline-flex h-12 items-center justify-center rounded-full bg-brand-brown px-8 text-sm font-bold uppercase tracking-wider text-white transition-colors hover:bg-brand-brown/90"
 					>
 						Log In
 					</Link>
 					<Link
 						href="/"
+						aria-label="Go to home"
 						className="inline-flex h-12 items-center justify-center rounded-full border-2 border-brand-brown px-8 text-sm font-bold uppercase tracking-wider text-brand-brown transition-colors hover:bg-brand-brown/5"
 					>
 						Go to Home
@@ -91,6 +93,7 @@ export default function SessionExpiredPage() {
 					<p className="mt-3 text-center">
 						<Link
 							href="/help"
+							aria-label="Where to find my access code"
 							className="text-sm text-brand-brown/60 underline underline-offset-2 transition-colors hover:text-brand-brown"
 						>
 							Where do I find my access code?

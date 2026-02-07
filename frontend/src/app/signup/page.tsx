@@ -337,6 +337,7 @@ export default function SignupPage() {
 								I agree to the{" "}
 								<Link
 									href="/terms"
+									aria-label="Terms of Service"
 									className="underline underline-offset-2 hover:text-brand-brown/70"
 								>
 									Terms of Service
@@ -344,6 +345,7 @@ export default function SignupPage() {
 								and{" "}
 								<Link
 									href="/privacy"
+									aria-label="Privacy Policy"
 									className="underline underline-offset-2 hover:text-brand-brown/70"
 								>
 									Privacy Policy
@@ -374,6 +376,7 @@ export default function SignupPage() {
 						Already registered?{" "}
 						<Link
 							href="/login"
+							aria-label="Log in"
 							className="underline underline-offset-2 hover:text-brand-brown/70"
 						>
 							Log in

@@ -180,6 +180,7 @@ export default function ResumePage() {
 
 					<Link
 						href="/start"
+						aria-label="Start a new profile instead"
 						className="mt-6 inline-flex items-center gap-1.5 text-sm font-semibold uppercase tracking-wider text-brand-orange transition-colors hover:text-brand-orange/80"
 					>
 						Start a New Profile Instead

@@ -54,6 +54,7 @@ export function ProfileCard({
 					<>
 						<Link
 							href={`/profile/${profile.conversationId}`}
+							aria-label={`View ${profile.studentName}'s profile`}
 							className="inline-flex h-9 items-center justify-center rounded-full bg-brand-brown px-4 text-xs font-bold uppercase tracking-wider text-white transition-colors hover:bg-brand-brown/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
 						>
 							View
@@ -77,6 +78,7 @@ export function ProfileCard({
 					<>
 						<Link
 							href={`/conversation/${profile.conversationId}`}
+							aria-label={`Continue ${profile.studentName}'s profile`}
 							className="inline-flex h-9 items-center justify-center rounded-full bg-brand-brown px-4 text-xs font-bold uppercase tracking-wider text-white transition-colors hover:bg-brand-brown/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
 						>
 							Continue

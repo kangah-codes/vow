@@ -78,6 +78,7 @@ export class ErrorBoundary extends Component<
 						</button>
 						<Link
 							href="/dashboard"
+							aria-label="Go to dashboard"
 							className="inline-flex h-12 items-center justify-center rounded-full border-2 border-brand-brown px-8 text-sm font-bold uppercase tracking-wider text-brand-brown transition-colors hover:bg-brand-brown/5"
 						>
 							Go to Dashboard
@@ -108,6 +109,7 @@ export class ErrorBoundary extends Component<
 								If the problem persists,{" "}
 								<Link
 									href="/contact"
+									aria-label="Contact support"
 									className="font-medium text-brand-brown underline underline-offset-2"
 								>
 									contact support

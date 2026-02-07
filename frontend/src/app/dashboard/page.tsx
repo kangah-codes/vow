@@ -90,12 +90,14 @@ export default function DashboardPage() {
 					<div className="mt-6 flex flex-col gap-3 sm:flex-row">
 						<Link
 							href="/start"
+							aria-label="Start new profile"
 							className="inline-flex h-12 items-center justify-center rounded-full bg-brand-brown px-6 text-sm font-bold uppercase tracking-wider text-white transition-colors hover:bg-brand-brown/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
 						>
 							Start New Profile
 						</Link>
 						<Link
 							href="/resume"
+							aria-label="Resume with access code"
 							className="inline-flex h-12 items-center justify-center rounded-full border-2 border-brand-brown px-6 text-sm font-bold uppercase tracking-wider text-brand-brown transition-colors hover:bg-brand-brown/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
 						>
 							Resume with Code

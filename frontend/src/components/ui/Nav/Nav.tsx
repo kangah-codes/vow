@@ -115,6 +115,7 @@ export function Nav({
 					{backLink ? (
 						<Link
 							href={backLink.href}
+							aria-label={backLink.label}
 							className="flex items-center gap-1.5 text-sm font-semibold uppercase tracking-wider text-brand-orange transition-colors hover:text-brand-orange/80"
 						>
 							<span aria-hidden="true">&larr;</span>
@@ -146,6 +147,7 @@ export function Nav({
 							<Link
 								key={action.label}
 								href={action.href}
+								aria-label={action.label}
 								className={cn(
 									"inline-flex h-11 items-center justify-center rounded-full px-7 text-sm font-semibold uppercase tracking-wider transition-colors",
 									actionClasses(action.variant, dark),
@@ -217,6 +219,7 @@ export function Nav({
 											<Link
 												key={action.label}
 												href={action.href}
+												aria-label={action.label}
 												onClick={() => setMobileOpen(false)}
 												className={cn(
 													"inline-flex h-11 items-center justify-center rounded-full px-7 text-sm font-semibold uppercase tracking-wider transition-colors",
@@ -247,6 +250,7 @@ export function Nav({
 								{backLink && (
 									<Link
 										href={backLink.href}
+										aria-label={backLink.label}
 										onClick={() => setMobileOpen(false)}
 										className="mt-6 flex items-center gap-1.5 text-sm font-semibold uppercase tracking-wider text-brand-orange transition-colors hover:text-brand-orange/80"
 									>

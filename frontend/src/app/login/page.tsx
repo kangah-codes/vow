@@ -201,6 +201,7 @@ export default function LoginPage() {
 						<p>
 							<Link
 								href="/forgot-password"
+								aria-label="Forgot password"
 								className="underline underline-offset-2 hover:text-brand-brown/70"
 							>
 								Forgot password?
@@ -210,6 +211,7 @@ export default function LoginPage() {
 							Don&apos;t have an account?{" "}
 							<Link
 								href="/signup"
+								aria-label="Sign up"
 								className="underline underline-offset-2 hover:text-brand-brown/70"
 							>
 								Sign up

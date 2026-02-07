@@ -30,12 +30,14 @@ export function SharedError({ status }: SharedErrorProps) {
 					<div className="mt-6 flex flex-col gap-3">
 						<Link
 							href="/resume"
+							aria-label="Try another access code"
 							className="inline-flex h-12 items-center justify-center rounded-full bg-brand-brown px-8 text-sm font-bold uppercase tracking-wider text-white transition-colors hover:bg-brand-brown/90"
 						>
 							Try Another Code
 						</Link>
 						<Link
 							href="/"
+							aria-label="Go home"
 							className="inline-flex h-12 items-center justify-center rounded-full border-2 border-brand-brown px-8 text-sm font-bold uppercase tracking-wider text-brand-brown transition-colors hover:bg-brand-brown/5"
 						>
 							Go Home

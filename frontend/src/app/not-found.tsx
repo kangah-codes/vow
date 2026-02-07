@@ -25,12 +25,14 @@ export default function NotFound() {
 				<div className="mt-8 flex w-full max-w-md flex-col gap-3 sm:flex-row sm:justify-center">
 					<Link
 						href="/"
+						aria-label="Go to home"
 						className="inline-flex h-12 items-center justify-center rounded-full bg-brand-brown px-8 text-sm font-bold uppercase tracking-wider text-white transition-colors hover:bg-brand-brown/90"
 					>
 						Go to Home
 					</Link>
 					<Link
 						href="/dashboard"
+						aria-label="View dashboard"
 						className="inline-flex h-12 items-center justify-center rounded-full border-2 border-brand-brown px-8 text-sm font-bold uppercase tracking-wider text-brand-brown transition-colors hover:bg-brand-brown/5"
 					>
 						View Dashboard
@@ -45,6 +47,7 @@ export default function NotFound() {
 						<li>
 							<Link
 								href="/start"
+								aria-label="Start a new profile"
 								className="text-sm text-brand-orange underline underline-offset-2 transition-colors hover:text-brand-orange/80"
 							>
 								Start a new profile
@@ -53,6 +56,7 @@ export default function NotFound() {
 						<li>
 							<Link
 								href="/resume"
+								aria-label="Resume with access code"
 								className="text-sm text-brand-orange underline underline-offset-2 transition-colors hover:text-brand-orange/80"
 							>
 								Resume with access code
@@ -61,6 +65,7 @@ export default function NotFound() {
 						<li>
 							<Link
 								href="/help"
+								aria-label="Visit help center"
 								className="text-sm text-brand-orange underline underline-offset-2 transition-colors hover:text-brand-orange/80"
 							>
 								Visit help center
@@ -69,6 +74,7 @@ export default function NotFound() {
 						<li>
 							<Link
 								href="/contact"
+								aria-label="Contact support"
 								className="text-sm text-brand-orange underline underline-offset-2 transition-colors hover:text-brand-orange/80"
 							>
 								Contact support

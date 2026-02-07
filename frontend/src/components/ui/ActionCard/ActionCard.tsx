@@ -84,6 +84,7 @@ export function ActionCard({
 			{buttonHref ? (
 				<Link
 					href={buttonHref}
+					aria-label={buttonLabel}
 					className="mt-8 inline-flex h-13 items-center gap-2 rounded-full bg-brand-brown px-8 text-base font-bold uppercase tracking-wide text-white transition-colors hover:bg-brand-brown/90 md:mt-10"
 				>
 					{buttonLabel}
