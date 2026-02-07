@@ -109,7 +109,7 @@ export async function createProfile(
 				{
 					sender: "ai",
 					senderName: "Genius Guide",
-					message: `Welcome! I'm here to help build ${value.studentName}'s Genius Summary. Let's start by exploring their interests. What activities or subjects does ${value.studentName} enjoy the most?`,
+					message: `Welcome! I'm the Genius Guide, and I'm here to help build ${value.studentName}'s Genius Summary. Let's start by exploring their interests. What activities or subjects does ${value.studentName} enjoy the most?`,
 					timestamp: new Date(),
 				},
 			],

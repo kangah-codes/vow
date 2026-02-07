@@ -1,3 +1,4 @@
+import { env } from "./../config/env";
 import { openai } from "./openai.service";
 import { IProfile, Profile } from "../models/profile.model";
 import { IConversation, IMessage } from "../models/conversation.model";
@@ -264,17 +265,19 @@ function buildSectionSummaryPrompt(
 ): string {
 	return `You are writing a single section of a Genius Summary for educators.
 
-SECTION: "${currentSection}"
+		SECTION: "${currentSection}"
 
-Write a 100-150 word paragraph about ${profile.studentName} in third person. Use strengths-based language and include specific examples from the conversation. Summarize ONLY this section and do not mention other elements.
+		Write a 100-150 word paragraph about ${profile.studentName} in third person. Use strengths-based language and include specific examples from the conversation. Summarize ONLY this section and do not mention other elements.
 
-Style rules:
-- Educator audience, professional and warm
-- No bullet points, just one paragraph
-- Do not mention this instruction or the process
-- Avoid repeating the prompt text
+		Style rules:
+		- Educator audience, professional and warm
+		- No bullet points, just one paragraph
+		- Do not mention this instruction or the process
+		- Avoid repeating the prompt text
+		- Varied sentence structure, engaging and vivid language (not formulaic)
+		- Actionable insights that an educator could use to better support this student are great to include
 
-Output only the paragraph text.`;
+		Output only the paragraph text.`;
 }
 
 export async function streamSectionSummary(
@@ -288,7 +291,7 @@ export async function streamSectionSummary(
 	let fullResponse = "";
 
 	const stream = await openai.chat.completions.create({
-		model: "claude-sonnet-4-20250514",
+		model: env.COMPLETIONS_MODEL,
 		max_tokens: 300,
 		temperature: 0.4,
 		stream: true,
