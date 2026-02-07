@@ -243,6 +243,74 @@ export async function streamAIResponse(
 	};
 }
 
+function buildSummaryHistory(
+	messages: IMessage[],
+): Array<{ role: "user" | "assistant"; content: string }> {
+	const filtered = messages.filter(
+		(msg) => msg.sender === "user" || msg.sender === "ai",
+	);
+	const recent = filtered.slice(-12);
+	return recent.map((msg) => ({
+		role: (msg.sender === "user" ? "user" : "assistant") as
+			| "user"
+			| "assistant",
+		content: msg.message,
+	}));
+}
+
+function buildSectionSummaryPrompt(
+	profile: IProfile,
+	currentSection: string,
+): string {
+	return `You are writing a single section of a Genius Summary for educators.
+
+SECTION: "${currentSection}"
+
+Write a 100-150 word paragraph about ${profile.studentName} in third person. Use strengths-based language and include specific examples from the conversation. Summarize ONLY this section and do not mention other elements.
+
+Style rules:
+- Educator audience, professional and warm
+- No bullet points, just one paragraph
+- Do not mention this instruction or the process
+- Avoid repeating the prompt text
+
+Output only the paragraph text.`;
+}
+
+export async function streamSectionSummary(
+	profile: IProfile,
+	conversation: IConversation,
+	currentSection: string,
+): Promise<{ stream: AsyncIterable<string>; getFullResponse: () => string }> {
+	const systemPrompt = buildSectionSummaryPrompt(profile, currentSection);
+	const messageHistory = buildSummaryHistory(conversation.messages);
+
+	let fullResponse = "";
+
+	const stream = await openai.chat.completions.create({
+		model: "claude-sonnet-4-20250514",
+		max_tokens: 300,
+		temperature: 0.4,
+		stream: true,
+		messages: [{ role: "system", content: systemPrompt }, ...messageHistory],
+	});
+
+	async function* generateChunks(): AsyncIterable<string> {
+		for await (const chunk of stream) {
+			const content = chunk.choices[0]?.delta?.content;
+			if (content) {
+				fullResponse += content;
+				yield content;
+			}
+		}
+	}
+
+	return {
+		stream: generateChunks(),
+		getFullResponse: () => fullResponse,
+	};
+}
+
 export function parseAIResponse(raw: string): AIResponse {
 	try {
 		// Try to extract JSON from the response (handle potential markdown wrapping)
@@ -316,6 +384,25 @@ export async function updateProfileProgress(
 
 	await profile.save();
 
+	return profile;
+}
+
+export async function updateSectionDescription(
+	profileId: string,
+	currentSection: string,
+	description: string,
+): Promise<IProfile | null> {
+	const profile = await Profile.findById(profileId);
+	if (!profile) return null;
+
+	const sectionIndex = profile.sections.findIndex(
+		(s) => s.title === currentSection,
+	);
+	if (sectionIndex !== -1) {
+		profile.sections[sectionIndex].description = description;
+	}
+
+	await profile.save();
 	return profile;
 }
 

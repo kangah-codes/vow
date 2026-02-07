@@ -19,6 +19,15 @@ jest.mock("../openai.service", () => ({
 	},
 }));
 
+jest.mock("../../utils/logger", () => ({
+	logger: {
+		info: jest.fn(),
+		warn: jest.fn(),
+		error: jest.fn(),
+		debug: jest.fn(),
+	},
+}));
+
 jest.mock("../../models/profile.model", () => ({
 	Profile: {
 		findById: jest.fn(),
@@ -87,13 +96,13 @@ describe("conversation.service", () => {
 		const save = jest.fn();
 		const profile = {
 			sections: [
-				{ title: "Interest Awareness", status: "in-progress" },
+				{ title: "Interest Awareness", status: "in-progress", description: "" },
 				{ title: "Racial/Cultural Pride", status: "not-started" },
 			],
 			percentComplete: 0,
 			status: "in-progress",
 			save,
-		};
+		} as any;
 		(Profile.findById as jest.Mock).mockResolvedValue(profile);
 
 		const updated = await updateProfileProgress("id", "Interest Awareness", {
@@ -126,7 +135,7 @@ describe("conversation.service", () => {
 			relationship: "parent",
 			gradeLevel: "3",
 			sections: [
-				{ title: "Interest Awareness", status: "in-progress" },
+				{ title: "Interest Awareness", status: "in-progress", description: "" },
 				{ title: "Racial/Cultural Pride", status: "not-started" },
 			],
 		};
