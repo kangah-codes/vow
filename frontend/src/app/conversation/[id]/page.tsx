@@ -49,6 +49,10 @@ export default function ConversationPage() {
 		status: string;
 	} | null>(null);
 	const [showCompleteModal, setShowCompleteModal] = useState(false);
+	const [streamingSummary, setStreamingSummary] = useState<{
+		sectionTitle: string;
+		content: string;
+	} | null>(null);
 
 	const wsRef = useRef<WebSocket | null>(null);
 	const hasJoined = useRef(false);
@@ -152,7 +156,15 @@ export default function ConversationPage() {
 					}, 60);
 					break;
 				}
+				case "section_content_chunk": {
+					setStreamingSummary({
+						sectionTitle: msg.payload.sectionTitle,
+						content: msg.payload.content,
+					});
+					break;
+				}
 				case "section_complete": {
+					setStreamingSummary(null);
 					setProfileState({
 						percentComplete: msg.payload.percentComplete,
 						sections: msg.payload.sections,
@@ -211,7 +223,13 @@ export default function ConversationPage() {
 	const studentName = profile.studentName;
 	const currentPercent =
 		profileState?.percentComplete ?? profile.percentComplete;
-	const currentSections = profileState?.sections ?? profile.sections;
+	const baseSections = profileState?.sections ?? profile.sections;
+	const currentSections = baseSections.map((section) => {
+		if (streamingSummary && section.title === streamingSummary.sectionTitle) {
+			return { ...section, description: streamingSummary.content };
+		}
+		return section;
+	});
 	const currentStatus = profileState?.status ?? profile.status;
 	const isProfileComplete = currentStatus === "complete";
 	const isSendDisabled =

@@ -222,6 +222,17 @@ export function handleWebSocketConnection(
 									}),
 								);
 							}
+
+							// Try to extract sectionContent progressively for sidebar streaming
+							const sectionContent = extractSectionContentField(streamedMessage);
+							if (sectionContent) {
+								ws.send(
+									JSON.stringify({
+										type: "section_content_chunk",
+										payload: { sectionTitle: activeSection, content: sectionContent },
+									}),
+								);
+							}
 						}
 
 						if (ws.readyState !== WebSocket.OPEN) return;
@@ -354,16 +365,16 @@ export function handleWebSocketConnection(
 }
 
 /**
- * Progressively extract the "message" field from a partial JSON stream.
- * Returns the extracted text so far, or null if we can't parse yet.
+ * Progressively extract a JSON string field from a partial JSON stream.
+ * Returns the extracted text so far, or null if the key hasn't appeared yet.
  */
-function extractMessageField(partial: string): string | null {
-	// Look for "message": " pattern and extract content after it
-	const messageStart = partial.indexOf('"message"');
-	if (messageStart === -1) return null;
+function extractJsonStringField(partial: string, key: string): string | null {
+	const keyPattern = `"${key}"`;
+	const keyStart = partial.indexOf(keyPattern);
+	if (keyStart === -1) return null;
 
 	// Find the opening quote of the value
-	const colonIndex = partial.indexOf(":", messageStart + 9);
+	const colonIndex = partial.indexOf(":", keyStart + keyPattern.length);
 	if (colonIndex === -1) return null;
 
 	// Find the start of the string value
@@ -396,4 +407,12 @@ function extractMessageField(partial: string): string | null {
 	}
 
 	return result || null;
+}
+
+function extractMessageField(partial: string): string | null {
+	return extractJsonStringField(partial, "message");
+}
+
+function extractSectionContentField(partial: string): string | null {
+	return extractJsonStringField(partial, "sectionContent");
 }
