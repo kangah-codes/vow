@@ -48,6 +48,23 @@ gcloud run deploy vow-backend \
   --port 8080 \
   --allow-unauthenticated \
   --set-env-vars MONGODB_URI="...",JWT_SECRET="...",JWT_REFRESH_SECRET="...",COMPLETIONS_MODEL="claude-sonnet-4-20250514"
+
+
+gcloud run deploy vow-backend \
+  --image "gcr.io/$PROJECT_ID/vow-backend" \
+  --region $REGION \
+  --port 8080 \
+  --allow-unauthenticated \
+  --env-vars-file .env.yaml
+
+gcloud run deploy vow-backend \
+  --image "gcr.io/$PROJECT_ID/vow-backend" \
+  --region $REGION \
+  --port 8080 \
+  --allow-unauthenticated \
+  --set-env-vars "$(sed 's/^/ /' .env.production | tr '\n' ',')"
+
+
 ```
 
 ## Entrypoint
