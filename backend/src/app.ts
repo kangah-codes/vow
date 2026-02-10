@@ -5,6 +5,7 @@ import passport from "./config/passport";
 import routes from "./routes";
 import { requestLogger } from "./middleware/logger.middleware";
 import { errorHandler } from "./middleware/error.middleware";
+import { connectDB } from "./config/db";
 
 const app = express();
 
@@ -12,6 +13,14 @@ app.use(cors());
 app.use(express.json());
 app.use(passport.initialize());
 app.use(requestLogger);
+app.use(async (_req, _res, next) => {
+	try {
+		await connectDB();
+		next();
+	} catch (err) {
+		next(err);
+	}
+});
 
 const apiLimiter = rateLimit({
 	windowMs: 15 * 60 * 1000, // 15 minutes
