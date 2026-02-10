@@ -4,8 +4,7 @@ import { useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { Nav } from "@/components/ui/Nav";
-
-const API_BASE_URL = "http://localhost:3001/api";
+import { API_BASE_URL } from "@/lib/utils/api";
 
 export default function PasswordResetPage() {
 	const params = useParams();

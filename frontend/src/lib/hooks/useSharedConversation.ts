@@ -1,8 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { ApiError } from "@/lib/utils/api";
+import { ApiError, API_BASE_URL } from "@/lib/utils/api";
 import type { ConversationResponse } from "./useConversation";
-
-const API_BASE_URL = "http://localhost:3001/api";
 
 export function useSharedConversation(accessCode: string) {
 	return useQuery<ConversationResponse["data"], ApiError>({

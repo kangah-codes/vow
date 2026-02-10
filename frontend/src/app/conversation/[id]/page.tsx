@@ -19,7 +19,7 @@ import { useConversation } from "@/lib/hooks/useConversation";
 import { getAccessToken } from "@/lib/utils/cookies";
 import { formatTime } from "@/lib/utils/utils";
 
-const WS_URL = "ws://localhost:3001";
+const WS_URL = process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:3001";
 
 export default function ConversationPage() {
 	const params = useParams();

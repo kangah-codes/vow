@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-
-const API_BASE_URL = "http://localhost:3001/api";
+import { API_BASE_URL } from "@/lib/utils/api";
 
 export function useValidateAccessCode() {
 	const router = useRouter();

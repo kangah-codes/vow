@@ -1,6 +1,8 @@
 import { getAccessToken } from "@/lib/utils/cookies";
 
-const API_BASE_URL = "http://localhost:3001/api";
+// Prefer env override so frontend can point at any API host without code changes
+export const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3001/api";
 
 export class ApiError extends Error {
 	constructor(
