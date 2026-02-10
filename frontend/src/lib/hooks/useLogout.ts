@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { apiFetch, ApiError, setLoggingOut } from "@/lib/utils/api";
+import { apiFetch, ApiError } from "@/lib/utils/api";
 import { clearAuthCookies } from "@/lib/utils/cookies";
 
 interface LogoutResponse {
@@ -29,11 +29,11 @@ export function useLogout() {
 
 	return useMutation<LogoutResponse, ApiError, void>({
 		mutationFn: async () => {
-			setLoggingOut(true);
 			const refreshToken = getRefreshToken();
 			return apiFetch<LogoutResponse>("/auth/logout", {
 				method: "POST",
 				body: JSON.stringify({ refreshToken }),
+				skipAuthRedirect: true,
 			});
 		},
 		onSuccess: () => {

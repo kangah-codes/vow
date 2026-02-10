@@ -1,8 +1,7 @@
 import { getAccessToken } from "@/lib/utils/cookies";
 
-// Prefer env override so frontend can point at any API host without code changes
 export const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3001/api";
+	process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3001/api";
 
 export class ApiError extends Error {
 	constructor(
@@ -14,30 +13,29 @@ export class ApiError extends Error {
 	}
 }
 
-let isLoggingOut = false;
-
-export function setLoggingOut(value: boolean) {
-	isLoggingOut = value;
+interface ApiFetchOptions extends RequestInit {
+	skipAuthRedirect?: boolean;
 }
 
 export async function apiFetch<T>(
 	path: string,
-	options?: RequestInit,
+	options?: ApiFetchOptions,
 ): Promise<T> {
+	const { skipAuthRedirect, ...fetchOptions } = options ?? {};
 	const token = getAccessToken();
 	const res = await fetch(`${API_BASE_URL}${path}`, {
-		...options,
+		...fetchOptions,
 		headers: {
 			"Content-Type": "application/json",
 			...(token ? { Authorization: `Bearer ${token}` } : {}),
-			...options?.headers,
+			...fetchOptions?.headers,
 		},
 	});
 
 	const data = await res.json();
 
 	if (!res.ok) {
-		if (res.status === 401 && typeof window !== "undefined" && !isLoggingOut) {
+		if (res.status === 401 && typeof window !== "undefined" && !skipAuthRedirect) {
 			document.cookie = "accessToken=; path=/; max-age=0";
 			document.cookie = "refreshToken=; path=/; max-age=0";
 
