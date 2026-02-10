@@ -37,13 +37,13 @@ Replace `<backend-service-url>` with the HTTPS/WS endpoint Cloud Run gives your 
 
 ## Local Docker Run
 
-- Backend: see `/Users/user74/Desktop/code/vow-app/backend/README.md`
-- Frontend: see `/Users/user74/Desktop/code/vow-app/frontend/README.md`
+- Backend: see `backend/README.md`
+- Frontend: see `frontend/README.md`
 
 ## Source Layout
 
-- Backend (Express + WebSocket): `/Users/user74/Desktop/code/vow-app/backend`
-- Frontend (Next.js 16): `/Users/user74/Desktop/code/vow-app/frontend`
+- Backend (Express + WebSocket): `backend`
+- Frontend (Next.js 16): `frontend`
 
 ## Notes
 
