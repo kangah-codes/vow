@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import { useForm } from "react-hook-form";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -15,6 +16,14 @@ interface LoginFormData {
 }
 
 export default function LoginPage() {
+	return (
+		<Suspense>
+			<LoginContent />
+		</Suspense>
+	);
+}
+
+function LoginContent() {
 	const router = useRouter();
 	const searchParams = useSearchParams();
 	const login = useLogin();
