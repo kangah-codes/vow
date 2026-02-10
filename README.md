@@ -1,4 +1,4 @@
-# Vow App – Deploy to Google Cloud Run
+# Vow App
 
 This repository contains a Next.js frontend and a Node/Express (TypeScript) backend. Use the Dockerfiles to build images and deploy each service to Cloud Run.
 
