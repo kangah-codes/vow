@@ -14,7 +14,7 @@ jest.mock("next/link", () => {
 	);
 });
 jest.mock("next/image", () => {
-	return (props: any) => <img {...props} />;
+	return ({ priority, ...props }: any) => <img {...props} />; // drop unsupported prop in JSDOM
 });
 jest.mock("@radix-ui/react-dialog", () => {
 	return {
@@ -37,7 +37,7 @@ describe("Nav", () => {
 	it("renders logo and brand by default", () => {
 		render(<Nav />);
 		expect(screen.getByAltText(/vow logo/i)).toBeInTheDocument();
-		expect(screen.getByText(/my genius profile/i)).toBeInTheDocument();
+		expect(screen.getByText(/my genius summary/i)).toBeInTheDocument();
 	});
 
 	it("renders backLink when provided", () => {

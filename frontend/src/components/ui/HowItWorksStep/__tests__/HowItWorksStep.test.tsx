@@ -5,7 +5,8 @@ import HowItWorksStep, { HowItWorksStepProps } from "../HowItWorksStep";
 
 jest.mock("next/image", () => ({
 	__esModule: true,
-	default: (props: any) => {
+	// Drop Next.js-only boolean props like `fill` that emit DOM warnings in JSDOM
+	default: ({ fill, priority, ...props }: any) => {
 		// eslint-disable-next-line jsx-a11y/alt-text
 		return <img {...props} />;
 	},
