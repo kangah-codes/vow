@@ -9,6 +9,7 @@ import {
 	generateRefreshToken,
 } from "../services/auth.service";
 import { signupSchema, loginSchema } from "../validators/auth.validator";
+import { logger } from "../utils/logger";
 
 export async function signup(req: Request, res: Response): Promise<void> {
 	try {
@@ -139,6 +140,7 @@ export async function login(req: Request, res: Response): Promise<void> {
 			},
 		});
 	} catch (error) {
+		logger.error("Login error:", error);
 		res.status(500).json({
 			success: false,
 			error: "Login failed",
@@ -228,7 +230,8 @@ export async function forgotPassword(
 		if (!user) {
 			res.json({
 				success: true,
-				message: "If an account with that email exists, a reset link has been sent.",
+				message:
+					"If an account with that email exists, a reset link has been sent.",
 			});
 			return;
 		}
@@ -251,7 +254,8 @@ export async function forgotPassword(
 
 		res.json({
 			success: true,
-			message: "If an account with that email exists, a reset link has been sent.",
+			message:
+				"If an account with that email exists, a reset link has been sent.",
 		});
 	} catch (error) {
 		res.status(500).json({
